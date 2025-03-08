@@ -8,7 +8,7 @@
 
 ## Endpoint
 - **Method**: POST
-- **URL**: `/email/verify`
+- **URL**: `/email/code/sene`
 
 ## 설명
 사용자가 회원가입 시 입력한 이메일 주소에 대해, 해당 이메일의 소유권을 확인하기 위해 인증 코드를 발송합니다.
@@ -33,10 +33,10 @@
 
 ## Endpoint
 - **Method**: POST
-- **URL**: `/email/verify`
+- **URL**: `/email/code/verify`
 
 ## 설명
-이메일 인증 코드로 이메일을 인증한다. 인증 후 세션에 이메일이 등록된다.
+이메일 인증 코드로 이메일을 인증한다.
 
 ## 요청 (Request)
 - **Request Body (JSON)**
@@ -114,7 +114,7 @@
 
 ## Endpoint
 - Method: POST
-- URL: /webauthn/register
+- URL: /webauthn/registry/finish
 
 ## 설명
 
@@ -126,14 +126,17 @@
 
 ```json
 {
-  "email": "user@example.com",
-  "id": "credential-id-string",
-  "rawId": "Base64UrlEncodedRawId",
-  "type": "public-key",
-  "response": {
-    "clientDataJSON": "Base64UrlEncodedClientDataJSON",
-    "attestationObject": "Base64UrlEncodedAttestationObject"
-  }
+  "message" : "PassKey Register Start",
+  "data" : {
+    "email": "robin@example.com",
+    "id": "credential-id-string",
+    "rawId": "Base64UrlEncodedRawId",
+    "type": "public-key",
+    "response": {
+      "clientDataJSON": "Base64UrlEncodedClientDataJSON",
+      "attestationObject": "Base64UrlEncodedAttestationObject"
+    }
+  },
 }
 ```
 
