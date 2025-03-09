@@ -20,6 +20,12 @@
 
 * 등록에 성공하였다면 `로그인 화면`으로 이동한다.
 
+### API Endpoint
+ 
+* `POST /auth/temp/request` : 이메일 인증번호 요청
+* `POST /auth/temp/verify` : 이메일 인증 요청
+* `GET /auth/passkey/signup/request` : 패스키 등록 요청
+* `POST /auth/passkey/signup` : 패스키 등록
 
 ## 사용자 로그인
 
@@ -30,3 +36,8 @@
 * 패스키가 존재하지 않을 경우 회원가입 페이지로 이동 시킨다.
 
 * 인증에 성공하면 서버에서 `OAuth2`에 사용 할 `인증 토큰`을 전달한다.
+
+### API Endpoint
+
+* `POST /auth/passkey/signin/request` : 패스키 로그인 요청
+* `POST /auth/passkey/signin` : 패스키 로그인 요청
