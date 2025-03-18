@@ -4,4 +4,6 @@ import com.sign.dto.EmailCertificationCode;
 
 public interface EmailCertificationRepository {
     EmailCertificationCode save(EmailCertificationCode emailCertificationCode);
+
+    EmailCertificationCode findByEmail(String emailAddress);
 }
