@@ -6,7 +6,8 @@ import com.sign.application.repository.RandomCodeGenerator;
 import com.sign.domain.EmailValidator;
 import com.sign.dto.EmailCertificationCode;
 import com.sign.dto.EmailCertificationRequest;
-import com.sign.dto.EmailSendResult;
+import com.sign.dto.EmailCertificationSendResult;
+import com.sign.dto.EmailValidationRequest;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class EmailCertificationUseCase {
     private final EmailSender emailSender;
     private final RandomCodeGenerator codeGenerator;
 
-    public void sendCertification(EmailCertificationRequest param) {
+    public EmailCertificationSendResult sendCertification(EmailCertificationRequest param) {
         EmailValidator.validateEmailAddress(param.email());
 
         Random random = new Random();
@@ -30,7 +31,15 @@ public class EmailCertificationUseCase {
                 new EmailCertificationCode(param.email(), code));
 
         // TODO 이메일 양식 설정 필요
-        EmailSendResult emailSendResult = emailSender.send(saved.email(), "인증 코드 발송", saved.certificationCode());
-        log.info(emailSendResult.toString());
+        EmailCertificationSendResult emailCertificationSendResult = emailSender.send(saved.email(), "인증 코드 발송",
+                saved.certificationCode());
+        log.info(emailCertificationSendResult.toString());
+        return emailCertificationSendResult;
+    }
+
+    public boolean validateCertification(EmailValidationRequest param) {
+        return emailCertificationRepository.findByEmail(param.email())
+                .certificationCode()
+                .equals(param.code());
     }
 }
