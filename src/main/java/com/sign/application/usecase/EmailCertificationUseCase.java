@@ -22,6 +22,12 @@ public class EmailCertificationUseCase {
     private final EmailSender emailSender;
     private final RandomCodeGenerator codeGenerator;
 
+    /*
+    TODO 이메일 전송 제한 구현, 응답에 이메일 재전송 요청 가능 시간, 만료 시간 적기
+    이메일 타임아웃 5분
+    이메일 재시도 횟수 - 1분에 1개
+    인증 코드 형태 - 숫자 6자리
+     */
     public EmailCertificationSendResult sendCertification(EmailCertificationRequest param) {
         EmailValidator.validateEmailAddress(param.email());
 
