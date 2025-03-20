@@ -1,7 +1,9 @@
 package com.sign.application.repository;
 
-import com.sign.dto.EmailCertificationSendResult;
+import com.sign.dto.EmailSendResult;
 
 public interface EmailSender {
-    EmailCertificationSendResult send(String to, String subject, String body);
+    EmailSendResult send(String to, String subject, String body);
+
+    boolean ableToSend(String to);
 }

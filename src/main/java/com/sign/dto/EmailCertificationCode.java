@@ -1,4 +1,6 @@
 package com.sign.dto;
 
-public record EmailCertificationCode(String email, String certificationCode) {
+import java.time.LocalDateTime;
+
+public record EmailCertificationCode(String email, String certificationCode, LocalDateTime expiredAt) {
 }
