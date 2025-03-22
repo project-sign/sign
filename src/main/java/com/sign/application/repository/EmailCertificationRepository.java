@@ -1,9 +1,10 @@
 package com.sign.application.repository;
 
 import com.sign.dto.EmailCertificationCode;
+import java.util.Optional;
 
 public interface EmailCertificationRepository {
     EmailCertificationCode save(EmailCertificationCode emailCertificationCode);
 
-    EmailCertificationCode findByEmail(String emailAddress);
+    Optional<EmailCertificationCode> findByEmail(String emailAddress);
 }

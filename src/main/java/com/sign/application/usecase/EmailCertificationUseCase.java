@@ -8,11 +8,14 @@ import com.sign.dto.EmailCertificationCode;
 import com.sign.dto.EmailCertificationRequest;
 import com.sign.dto.EmailSendResult;
 import com.sign.dto.EmailValidationRequest;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
+@Service
 @Slf4j
 @RequiredArgsConstructor
 public class EmailCertificationUseCase {
@@ -22,29 +25,30 @@ public class EmailCertificationUseCase {
     private final RandomCodeGenerator codeGenerator;
     private final CertificationLogger certificationLogger;
 
-    /*
-    TODO 이메일 전송 제한 구현, 응답에 이메일 재전송 요청 가능 시간, 만료 시간 적기
-    이메일 타임아웃 5분
-    이메일 재시도 횟수 - 1분에 1개
-    인증 코드 형태 - 숫자 6자리
-     */
+    private final Clock clock;
+
     public EmailSendResult sendCertification(EmailCertificationRequest param) {
-        // TODO 이메일 전송이 가능하지 않으면 실패 응답 + 언제부터 보낼 수 있는지 응답
-        // TODO 이메일 전송이 가능하면 6자리 인증 코드 + 만료 시간 저장 후 이메일 전송
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime certificationLastCreatedAt = certificationLogger.lastCreatedAtFor(param.email());
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime certificationLastCreatedAt = certificationLogger.lastCreatedAtFor(param.email())
+                .orElse(now.minusSeconds(60)); // 만약 로그가 없다면 메일을 보내야 한다.
         Duration between = Duration.between(certificationLastCreatedAt, now);
         if (between.getSeconds() < 60) {
             return EmailSendResult.failure("test@sign.co.kr", param.email(), "Sign 인증 번호", "아직 인증 메일을 보낼 수 없습니다.");
         }
+
         String code = codeGenerator.generate(6);
-        emailCertificationRepository.save(new EmailCertificationCode(param.email(), code, now.plusMinutes(5)));
+
+        EmailCertificationCode certificationCode = emailCertificationRepository.save(
+                new EmailCertificationCode(param.email(), code, now.plusMinutes(5))
+        );
+        certificationLogger.logCertification(certificationCode);
+
         return emailSender.send(param.email(), "Sign 인증 번호", code);
     }
 
     public boolean validateCertification(EmailValidationRequest param) {
         return emailCertificationRepository.findByEmail(param.email())
-                .certificationCode()
-                .equals(param.code());
+                .filter(it -> it.certificationCode().equals(param.code()))
+                .isPresent();
     }
 }
