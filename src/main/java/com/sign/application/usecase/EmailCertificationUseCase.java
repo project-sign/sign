@@ -47,8 +47,10 @@ public class EmailCertificationUseCase {
     }
 
     public boolean validateCertification(EmailValidationRequest param) {
+        LocalDateTime now = LocalDateTime.now(clock);
         return emailCertificationRepository.findByEmail(param.email())
                 .filter(it -> it.certificationCode().equals(param.code()))
+                .filter(it -> !now.isAfter(it.expiredAt()))
                 .isPresent();
     }
 }

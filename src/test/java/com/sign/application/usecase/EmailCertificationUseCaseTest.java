@@ -192,5 +192,17 @@ class EmailCertificationUseCaseTest {
             );
             assertThat(result).isTrue();
         }
+
+        @Test
+        @DisplayName("이메일에 해당하는 인증 코드가 이미 만료되었을 때 false 를 반환한다.")
+        void test4() {
+            when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(
+                    Optional.of(new EmailCertificationCode("test@test.com", "123456", NOW.minusSeconds(1)))
+            );
+            boolean result = emailCertificationUseCase.validateCertification(
+                    new EmailValidationRequest("test@test.com", "123456")
+            );
+            assertThat(result).isFalse();
+        }
     }
 }
