@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sign.application.repository.CertificationLogger;
+import com.sign.application.repository.EmailCertificationLogger;
 import com.sign.application.repository.EmailCertificationRepository;
 import com.sign.application.repository.EmailSender;
 import com.sign.application.repository.RandomCodeGenerator;
@@ -36,7 +36,7 @@ class EmailCertificationUseCaseTest {
     );
     private final EmailSender emailSender = Mockito.mock(EmailSender.class);
     private final RandomCodeGenerator codeGenerator = Mockito.mock(RandomCodeGenerator.class);
-    private final CertificationLogger certificationLogger = Mockito.mock(CertificationLogger.class);
+    private final EmailCertificationLogger emailCertificationLogger = Mockito.mock(EmailCertificationLogger.class);
 
     private final EmailCertificationProperties emailCertificationProperties = new EmailCertificationProperties(
             300, 60, "sign@sign.co.kr"
@@ -46,7 +46,7 @@ class EmailCertificationUseCaseTest {
             emailCertificationRepository,
             emailSender,
             codeGenerator,
-            certificationLogger,
+            emailCertificationLogger,
             emailCertificationProperties,
             CLOCK
     );
@@ -59,7 +59,7 @@ class EmailCertificationUseCaseTest {
         class WhenLogNotFound {
             @BeforeEach
             void mock() {
-                when(certificationLogger.lastCreatedAtFor(any())).thenReturn(Optional.empty());
+                when(emailCertificationLogger.lastCreatedAtFor(any())).thenReturn(Optional.empty());
                 emailCertificationUseCase.sendCertification(new EmailCertificationRequest("test@test.com"));
             }
 
@@ -80,7 +80,7 @@ class EmailCertificationUseCaseTest {
             @Test
             @DisplayName("인증 생성 로그가 생성된다.")
             void test3() {
-                verify(certificationLogger).logCertification(
+                verify(emailCertificationLogger).logCertification(
                         new EmailCertificationCode("test@test.com", any(), NOW.plusMinutes(5))
                 );
             }
@@ -105,7 +105,7 @@ class EmailCertificationUseCaseTest {
             class WhenLogFound1 {
                 @BeforeEach
                 void mock() {
-                    when(certificationLogger.lastCreatedAtFor(any())).thenReturn(
+                    when(emailCertificationLogger.lastCreatedAtFor(any())).thenReturn(
                             Optional.of(NOW.minusSeconds(59))
                     );
                     emailCertificationUseCase.sendCertification(new EmailCertificationRequest("test@test.com"));
@@ -133,7 +133,7 @@ class EmailCertificationUseCaseTest {
 
                 @BeforeEach
                 void mock() {
-                    when(certificationLogger.lastCreatedAtFor(any())).thenReturn(
+                    when(emailCertificationLogger.lastCreatedAtFor(any())).thenReturn(
                             Optional.of(NOW.minusSeconds(60))
                     );
                     emailCertificationUseCase.sendCertification(new EmailCertificationRequest("test@test.com"));
@@ -156,7 +156,7 @@ class EmailCertificationUseCaseTest {
                 @Test
                 @DisplayName("인증 생성 로그가 생성된다.")
                 void test3() {
-                    verify(certificationLogger).logCertification(
+                    verify(emailCertificationLogger).logCertification(
                             new EmailCertificationCode("test@test.com", any(), NOW.plusMinutes(5))
                     );
                 }

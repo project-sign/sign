@@ -1,6 +1,6 @@
 package com.sign.infrastructure.repository;
 
-import com.sign.application.repository.CertificationLogger;
+import com.sign.application.repository.EmailCertificationLogger;
 import com.sign.dto.EmailCertificationCode;
 import com.sign.infrastructure.jpa.CertificationLog;
 import com.sign.infrastructure.jpa.repository.CertificationLogJpaRepository;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
-public class CertificationLoggerImpl implements CertificationLogger {
+public class EmailCertificationLoggerImpl implements EmailCertificationLogger {
 
     private final CertificationLogJpaRepository jpaRepository;
 

@@ -1,6 +1,6 @@
 package com.sign.application.usecase;
 
-import com.sign.application.repository.CertificationLogger;
+import com.sign.application.repository.EmailCertificationLogger;
 import com.sign.application.repository.EmailCertificationRepository;
 import com.sign.application.repository.EmailSender;
 import com.sign.application.repository.RandomCodeGenerator;
@@ -24,7 +24,7 @@ public class EmailCertificationUseCase {
     private final EmailCertificationRepository emailCertificationRepository;
     private final EmailSender emailSender;
     private final RandomCodeGenerator codeGenerator;
-    private final CertificationLogger certificationLogger;
+    private final EmailCertificationLogger emailCertificationLogger;
 
     private final EmailCertificationProperties emailCertificationProperties;
 
@@ -32,7 +32,7 @@ public class EmailCertificationUseCase {
 
     public EmailSendResult sendCertification(EmailCertificationRequest param) {
         LocalDateTime now = LocalDateTime.now(clock);
-        LocalDateTime certificationLastCreatedAt = certificationLogger.lastCreatedAtFor(param.email())
+        LocalDateTime certificationLastCreatedAt = emailCertificationLogger.lastCreatedAtFor(param.email())
                 .orElse(now.minusSeconds(emailCertificationProperties.reSendTimeAsSeconds())); // 만약 로그가 없다면 메일을 보내야 한다.
         Duration between = Duration.between(certificationLastCreatedAt, now);
         if (between.getSeconds() < emailCertificationProperties.reSendTimeAsSeconds()) {
@@ -46,7 +46,7 @@ public class EmailCertificationUseCase {
                 new EmailCertificationCode(param.email(), code,
                         now.plusSeconds(emailCertificationProperties.expiredTimeAsSeconds()))
         );
-        certificationLogger.logCertification(certificationCode);
+        emailCertificationLogger.logCertification(certificationCode);
 
         return emailSender.send(emailCertificationProperties.mailHost(), param.email(), "Sign 인증 번호", code);
     }
