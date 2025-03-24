@@ -4,6 +4,7 @@ import com.sign.application.repository.CertificationLogger;
 import com.sign.application.repository.EmailCertificationRepository;
 import com.sign.application.repository.EmailSender;
 import com.sign.application.repository.RandomCodeGenerator;
+import com.sign.application.usecase.config.EmailCertificationProperties;
 import com.sign.dto.EmailCertificationCode;
 import com.sign.dto.EmailCertificationRequest;
 import com.sign.dto.EmailSendResult;
@@ -25,25 +26,29 @@ public class EmailCertificationUseCase {
     private final RandomCodeGenerator codeGenerator;
     private final CertificationLogger certificationLogger;
 
+    private final EmailCertificationProperties emailCertificationProperties;
+
     private final Clock clock;
 
     public EmailSendResult sendCertification(EmailCertificationRequest param) {
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime certificationLastCreatedAt = certificationLogger.lastCreatedAtFor(param.email())
-                .orElse(now.minusSeconds(60)); // 만약 로그가 없다면 메일을 보내야 한다.
+                .orElse(now.minusSeconds(emailCertificationProperties.reSendTimeAsSeconds())); // 만약 로그가 없다면 메일을 보내야 한다.
         Duration between = Duration.between(certificationLastCreatedAt, now);
-        if (between.getSeconds() < 60) {
-            return EmailSendResult.failure("test@sign.co.kr", param.email(), "Sign 인증 번호", "아직 인증 메일을 보낼 수 없습니다.");
+        if (between.getSeconds() < emailCertificationProperties.reSendTimeAsSeconds()) {
+            return EmailSendResult.failure(emailCertificationProperties.mailHost(), param.email(), "Sign 인증 번호",
+                    "아직 인증 메일을 보낼 수 없습니다.");
         }
 
         String code = codeGenerator.generate(6);
 
         EmailCertificationCode certificationCode = emailCertificationRepository.save(
-                new EmailCertificationCode(param.email(), code, now.plusMinutes(5))
+                new EmailCertificationCode(param.email(), code,
+                        now.plusSeconds(emailCertificationProperties.expiredTimeAsSeconds()))
         );
         certificationLogger.logCertification(certificationCode);
 
-        return emailSender.send(param.email(), "Sign 인증 번호", code);
+        return emailSender.send(emailCertificationProperties.mailHost(), param.email(), "Sign 인증 번호", code);
     }
 
     public boolean validateCertification(EmailValidationRequest param) {

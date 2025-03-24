@@ -10,6 +10,7 @@ import com.sign.application.repository.CertificationLogger;
 import com.sign.application.repository.EmailCertificationRepository;
 import com.sign.application.repository.EmailSender;
 import com.sign.application.repository.RandomCodeGenerator;
+import com.sign.application.usecase.config.EmailCertificationProperties;
 import com.sign.dto.EmailCertificationCode;
 import com.sign.dto.EmailCertificationRequest;
 import com.sign.dto.EmailSendResult;
@@ -37,8 +38,17 @@ class EmailCertificationUseCaseTest {
     private final RandomCodeGenerator codeGenerator = Mockito.mock(RandomCodeGenerator.class);
     private final CertificationLogger certificationLogger = Mockito.mock(CertificationLogger.class);
 
+    private final EmailCertificationProperties emailCertificationProperties = new EmailCertificationProperties(
+            300, 60, "sign@sign.co.kr"
+    );
+
     private final EmailCertificationUseCase emailCertificationUseCase = new EmailCertificationUseCase(
-            emailCertificationRepository, emailSender, codeGenerator, certificationLogger, CLOCK
+            emailCertificationRepository,
+            emailSender,
+            codeGenerator,
+            certificationLogger,
+            emailCertificationProperties,
+            CLOCK
     );
 
     @Nested
@@ -78,7 +88,12 @@ class EmailCertificationUseCaseTest {
             @Test
             @DisplayName("인증메일이 전송된다.")
             void test4() {
-                verify(emailSender).send(eq("test@test.com"), any(), any());
+                verify(emailSender).send(
+                        eq(emailCertificationProperties.mailHost()),
+                        eq("test@test.com"),
+                        any(),
+                        any()
+                );
             }
         }
 
@@ -103,7 +118,7 @@ class EmailCertificationUseCaseTest {
                             emailCertificationUseCase.sendCertification(new EmailCertificationRequest("test@test.com"))
                     ).isEqualTo(
                             EmailSendResult.failure(
-                                    "test@sign.co.kr",
+                                    emailCertificationProperties.mailHost(),
                                     "test@test.com",
                                     "Sign 인증 번호",
                                     "아직 인증 메일을 보낼 수 없습니다."
@@ -149,7 +164,12 @@ class EmailCertificationUseCaseTest {
                 @Test
                 @DisplayName("인증메일이 전송된다.")
                 void test4() {
-                    verify(emailSender).send(eq("test@test.com"), any(), any());
+                    verify(emailSender).send(
+                            eq(emailCertificationProperties.mailHost()),
+                            eq("test@test.com"),
+                            any(),
+                            any()
+                    );
                 }
             }
         }
