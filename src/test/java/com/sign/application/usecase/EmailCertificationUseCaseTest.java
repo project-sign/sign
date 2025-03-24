@@ -1,6 +1,7 @@
 package com.sign.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,14 @@ class EmailCertificationUseCaseTest {
     @Nested
     @DisplayName("sendCertification 테스트")
     class Test1 {
+
+        @DisplayName("이메일 규격에 맞지 않는 주소로 보낸다면")
+        void test() {
+            assertThatThrownBy(
+                    () -> emailCertificationUseCase.sendCertification(new EmailCertificationRequest("unValidAddress"))
+            ).isInstanceOf(IllegalAccessError.class).hasMessage("잘못된 이메일 주소입니다.");
+        }
+
         @Nested
         @DisplayName("인증 전송 로그가 없다면")
         class WhenLogNotFound {
