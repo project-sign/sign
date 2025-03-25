@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record EmailCertificationProperties(
         int expiredTimeAsSeconds,
         int reSendTimeAsSeconds,
+        int maxCertificationCount,
         String mailHost
 ) {
     public EmailCertificationProperties {

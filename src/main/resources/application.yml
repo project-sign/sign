@@ -22,3 +22,4 @@ email-certification:
   mail-host: "sign@sign.co.kr"
   re-send-time-as-seconds: 60
   expired-time-as-seconds: 300
+  max-certification-count: 3

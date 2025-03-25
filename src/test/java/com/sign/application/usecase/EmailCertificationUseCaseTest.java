@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.sign.application.repository.EmailCertificationLogger;
 import com.sign.application.repository.EmailCertificationRepository;
+import com.sign.application.repository.EmailCertificationTryLogger;
 import com.sign.application.repository.EmailSender;
 import com.sign.application.repository.RandomCodeGenerator;
 import com.sign.application.usecase.config.EmailCertificationProperties;
@@ -38,9 +39,11 @@ class EmailCertificationUseCaseTest {
     private final EmailSender emailSender = Mockito.mock(EmailSender.class);
     private final RandomCodeGenerator codeGenerator = Mockito.mock(RandomCodeGenerator.class);
     private final EmailCertificationLogger emailCertificationLogger = Mockito.mock(EmailCertificationLogger.class);
+    private final EmailCertificationTryLogger emailCertificationTryLogger = Mockito.mock(
+            EmailCertificationTryLogger.class);
 
     private final EmailCertificationProperties emailCertificationProperties = new EmailCertificationProperties(
-            300, 60, "sign@sign.co.kr"
+            300, 60, 3, "sign@sign.co.kr"
     );
 
     private final EmailCertificationUseCase emailCertificationUseCase = new EmailCertificationUseCase(
@@ -48,6 +51,7 @@ class EmailCertificationUseCaseTest {
             emailSender,
             codeGenerator,
             emailCertificationLogger,
+            emailCertificationTryLogger,
             emailCertificationProperties,
             CLOCK
     );
@@ -191,6 +195,9 @@ class EmailCertificationUseCaseTest {
         @Test
         @DisplayName("이메일에 해당하는 인증코드가 없을 때 false 를 반환한다.")
         void test1() {
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    0
+            );
             when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
             boolean result = emailCertificationUseCase.validateCertification(
                     new EmailValidationRequest("test@test.com", "123456")
@@ -201,6 +208,9 @@ class EmailCertificationUseCaseTest {
         @Test
         @DisplayName("이메일에 해당하는 인증코드와 입력이 다를 때 false 를 반환한다.")
         void test2() {
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    0
+            );
             when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(
                     Optional.of(new EmailCertificationCode("test@test.com", "111111", NOW.plusMinutes(5)))
             );
@@ -213,6 +223,9 @@ class EmailCertificationUseCaseTest {
         @Test
         @DisplayName("이메일에 해당하는 인증코드와 입력이 같을 때 true 를 반환한다.")
         void test3() {
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    0
+            );
             when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(
                     Optional.of(new EmailCertificationCode("test@test.com", "123456", NOW.plusMinutes(5)))
             );
@@ -225,6 +238,9 @@ class EmailCertificationUseCaseTest {
         @Test
         @DisplayName("이메일에 해당하는 인증 코드가 이미 만료되었을 때 false 를 반환한다.")
         void test4() {
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    0
+            );
             when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(
                     Optional.of(new EmailCertificationCode("test@test.com", "123456", NOW.minusSeconds(1)))
             );
@@ -232,6 +248,52 @@ class EmailCertificationUseCaseTest {
                     new EmailValidationRequest("test@test.com", "123456")
             );
             assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("인증 횟수가 초과되었을 때 false 를 반환한다.")
+        void test5() {
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    emailCertificationProperties.maxCertificationCount() + 1
+            );
+            boolean result = emailCertificationUseCase.validateCertification(
+                    new EmailValidationRequest("test@test.com", "123456")
+            );
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("인증 횟수가 남아있고, 인증에 실패하면 인증 횟수가 증가한다.")
+        void test6() {
+            int beforeTryCount = emailCertificationProperties.maxCertificationCount() - 1;
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    beforeTryCount
+            );
+            when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(
+                    Optional.of(new EmailCertificationCode("test@test.com", "111111", NOW.plusMinutes(5)))
+            );
+            emailCertificationUseCase.validateCertification(
+                    new EmailValidationRequest("test@test.com", "123456")
+            );
+
+            verify(emailCertificationTryLogger).saveTryCount("test@test.com", beforeTryCount + 1);
+        }
+
+        @Test
+        @DisplayName("인증에 성공하면 인증 횟수가 0이 된다.")
+        void test7() {
+            int beforeTryCount = emailCertificationProperties.maxCertificationCount() - 1;
+            when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
+                    beforeTryCount
+            );
+            when(emailCertificationRepository.findByEmail("test@test.com")).thenReturn(
+                    Optional.of(new EmailCertificationCode("test@test.com", "123456", NOW.plusMinutes(5)))
+            );
+            emailCertificationUseCase.validateCertification(
+                    new EmailValidationRequest("test@test.com", "123456")
+            );
+
+            verify(emailCertificationTryLogger).saveTryCount("test@test.com", 0);
         }
     }
 }

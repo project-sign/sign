@@ -34,7 +34,7 @@ public class EmailCertificationRepositoryImpl implements EmailCertificationRepos
     public Optional<EmailCertificationCode> findByEmail(String emailAddress) {
         Optional<EmailCertificationCodeEntity> entity = jpaRepository.findByEmail(emailAddress);
         LocalDateTime now = LocalDateTime.now();
-        return entity.stream().filter(it -> !it.getExpiredAt().isAfter(now))
+        return entity.stream().filter(it -> it.getExpiredAt().isAfter(now))
                 .map(it -> new EmailCertificationCode(it.getEmail(), it.getCertificationCode(), it.getExpiredAt()))
                 .findFirst();
     }
