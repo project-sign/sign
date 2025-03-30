@@ -9,14 +9,14 @@ public class RelyingPartyFixture {
 
     public static RelyingParty create(PasskeyRepository passkeyRepository) {
         RelyingPartyIdentity rpIdentity = RelyingPartyIdentity.builder()
-                .id("test.sign.com")
+                .id("sign.co.kr")
                 .name("sign test")
                 .build();
 
         return RelyingParty.builder()
                 .identity(rpIdentity)
                 .credentialRepository(passkeyRepository)
-                .origins(Set.of())
+                .origins(Set.of("https://sign.co.kr"))
                 .build();
     }
 }
