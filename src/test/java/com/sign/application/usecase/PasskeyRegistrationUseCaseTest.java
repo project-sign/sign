@@ -145,9 +145,10 @@ class PasskeyRegistrationUseCaseTest {
         void test4() {
             PublicKeyCredentialCreationOptions otherOption = passkeyRegistrationUseCase.start(email);
             PublicKeyCredential<AuthenticatorAttestationResponse,
-                    ClientRegistrationExtensionOutputs> otherCredential = container.create(options);
+                    ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOption);
 
-            assertThatCode(() -> passkeyRegistrationUseCase.finish(otherOption, otherCredential, email));
+            assertThatCode(() -> passkeyRegistrationUseCase.finish(otherOption, otherCredential, email))
+                    .doesNotThrowAnyException();
         }
 
         @Test
