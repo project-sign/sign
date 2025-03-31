@@ -1,6 +1,7 @@
 package com.sign.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
@@ -59,5 +60,18 @@ class PasskeyAssertionUseCaseTest {
         String actual = finish.getEmail();
 
         assertThat(actual).isEqualTo(email);
+    }
+
+
+    @Test
+    @DisplayName("전혀 다른 challenge로 로그인 할 경우 예외가 발생한다.")
+    void test2() {
+        AssertionRequest request = passkeyAssertionUseCase.start();
+        AssertionRequest otherRequest = passkeyAssertionUseCase.start();
+        PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> response = container.get(
+                request.getPublicKeyCredentialRequestOptions());
+        PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> otherResponse = container.get(
+                otherRequest.getPublicKeyCredentialRequestOptions());
+        assertThatThrownBy(() -> passkeyAssertionUseCase.finish(request, otherResponse));
     }
 }
