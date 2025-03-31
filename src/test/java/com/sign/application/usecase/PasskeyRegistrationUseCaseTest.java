@@ -159,5 +159,13 @@ class PasskeyRegistrationUseCaseTest {
             credential = container.create(options);
             assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(options, credential, email));
         }
+
+        @Test
+        @DisplayName("전혀 다른 challenge로 패스키를 등록할 경우 예외가 발생한다.")
+        void test6() {
+            PublicKeyCredentialCreationOptions otherOptions = passkeyRegistrationUseCase.start(email);
+            container.create(otherOptions);
+            assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(otherOptions, credential, email));
+        }
     }
 }
