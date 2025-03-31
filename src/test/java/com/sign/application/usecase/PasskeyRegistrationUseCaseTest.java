@@ -160,12 +160,30 @@ class PasskeyRegistrationUseCaseTest {
             assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(options, credential, email));
         }
 
-        @Test
-        @DisplayName("전혀 다른 challenge로 패스키를 등록할 경우 예외가 발생한다.")
-        void test6() {
-            PublicKeyCredentialCreationOptions otherOptions = passkeyRegistrationUseCase.start(email);
-            container.create(otherOptions);
-            assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(otherOptions, credential, email));
+        @Nested
+        @DisplayName("등록과 정보와 일치하지 않는 정보가 주어질 때")
+        class WhenDifferentChallenge {
+
+            private PublicKeyCredentialCreationOptions otherOptions;
+
+            @BeforeEach
+            void setUp() {
+                otherOptions = passkeyRegistrationUseCase.start(email);
+            }
+
+            @Test
+            @DisplayName("전혀 다른 challenge로 패스키를 등록할 경우 예외가 발생한다.")
+            void test1() {
+                assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(otherOptions, credential, email));
+            }
+
+            @Test
+            @DisplayName("전혀 다른 credential로 패스키를 등록할 경우 예외가 발생한다.")
+            void test2() {
+                PublicKeyCredential<AuthenticatorAttestationResponse,
+                        ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOptions);
+                assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(options, otherCredential, email));
+            }
         }
     }
 }

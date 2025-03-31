@@ -22,6 +22,7 @@ import de.adesso.softauthn.authenticator.WebAuthnAuthenticator;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class PasskeyAssertionUseCaseTest {
@@ -63,15 +64,32 @@ class PasskeyAssertionUseCaseTest {
     }
 
 
-    @Test
-    @DisplayName("전혀 다른 challenge로 로그인 할 경우 예외가 발생한다.")
-    void test2() {
-        AssertionRequest request = passkeyAssertionUseCase.start();
-        AssertionRequest otherRequest = passkeyAssertionUseCase.start();
-        PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> response = container.get(
-                request.getPublicKeyCredentialRequestOptions());
-        PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> otherResponse = container.get(
-                otherRequest.getPublicKeyCredentialRequestOptions());
-        assertThatThrownBy(() -> passkeyAssertionUseCase.finish(request, otherResponse));
+    @Nested
+    @DisplayName("등록과 정보와 일치하지 않는 정보가 주어질 때")
+    class WhenDifferentChallenge {
+        private AssertionRequest request;
+        private AssertionRequest otherRequest;
+        private PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> response;
+        private PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> otherResponse;
+
+        @BeforeEach
+        void setUp() {
+            request = passkeyAssertionUseCase.start();
+            otherRequest = passkeyAssertionUseCase.start();
+            response = container.get(request.getPublicKeyCredentialRequestOptions());
+            otherResponse = container.get(otherRequest.getPublicKeyCredentialRequestOptions());
+        }
+
+        @Test
+        @DisplayName("credential과 다른 challenge로 로그인 할 경우 예외가 발생한다.")
+        void test1() {
+            assertThatThrownBy(() -> passkeyAssertionUseCase.finish(request, otherResponse));
+        }
+
+        @Test
+        @DisplayName("challenge와 다른 credential로 로그인 할 경우 예외가 발생한다.")
+        void test2() {
+            assertThatThrownBy(() -> passkeyAssertionUseCase.finish(otherRequest, response));
+        }
     }
 }
