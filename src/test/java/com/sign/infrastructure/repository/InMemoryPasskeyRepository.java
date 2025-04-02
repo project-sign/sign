@@ -1,4 +1,4 @@
-package com.sign.application.usecase;
+package com.sign.infrastructure.repository;
 
 import com.sign.application.repository.PasskeyRepository;
 import com.yubico.webauthn.RegisteredCredential;
