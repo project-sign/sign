@@ -1,7 +1,6 @@
 package com.sign.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
@@ -81,15 +80,19 @@ class PasskeyAssertionUseCaseTest {
         }
 
         @Test
-        @DisplayName("credential과 다른 challenge로 로그인 할 경우 예외가 발생한다.")
+        @DisplayName("credential과 다른 challenge로 로그인 할 경우 실패한다.")
         void test1() {
-            assertThatThrownBy(() -> passkeyAssertionUseCase.finish(request, otherResponse));
+            PasskeyAssertionResult result = passkeyAssertionUseCase.finish(request, otherResponse);
+            boolean actual = result.getFailReason().isBlank();
+            assertThat(actual).isFalse();
         }
 
         @Test
-        @DisplayName("challenge와 다른 credential로 로그인 할 경우 예외가 발생한다.")
+        @DisplayName("challenge와 다른 credential로 로그인 할 경우 실패한다.")
         void test2() {
-            assertThatThrownBy(() -> passkeyAssertionUseCase.finish(otherRequest, response));
+            PasskeyAssertionResult result = passkeyAssertionUseCase.finish(otherRequest, response);
+            boolean actual = result.getFailReason().isBlank();
+            assertThat(actual).isFalse();
         }
     }
 }

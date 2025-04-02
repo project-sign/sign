@@ -43,7 +43,7 @@ public class PasskeyAssertionUseCase {
             }
             return PasskeyAssertionResult.failure("패스키 검증에 실패했습니다.");
         } catch (AssertionFailedException e) {
-            throw new RuntimeException("패스키 검증에 실패했습니다.");
+            return PasskeyAssertionResult.failure("패스키 검증에 실패했습니다.");
         }
     }
 }
