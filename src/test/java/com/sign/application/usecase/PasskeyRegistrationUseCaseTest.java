@@ -8,6 +8,7 @@ import com.sign.application.repository.PasskeyRepository;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
 import com.sign.infrastructure.repository.InMemoryPasskeyRepository;
+import com.sign.support.fixture.RelyingPartyFixture;
 import com.yubico.webauthn.RelyingParty;
 import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
 import com.yubico.webauthn.data.ByteArray;

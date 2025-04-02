@@ -1,4 +1,4 @@
-package com.sign.application.usecase;
+package com.sign.support.fixture;
 
 import com.sign.application.repository.PasskeyRepository;
 import com.yubico.webauthn.RelyingParty;
