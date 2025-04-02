@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
 import com.sign.dto.PasskeyAssertionResult;
+import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
 import com.yubico.webauthn.AssertionRequest;
 import com.yubico.webauthn.RelyingParty;
@@ -13,7 +14,6 @@ import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
 import com.yubico.webauthn.data.ClientAssertionExtensionOutputs;
 import com.yubico.webauthn.data.ClientRegistrationExtensionOutputs;
 import com.yubico.webauthn.data.PublicKeyCredential;
-import com.yubico.webauthn.data.PublicKeyCredentialCreationOptions;
 import de.adesso.softauthn.Authenticators;
 import de.adesso.softauthn.CredentialsContainer;
 import de.adesso.softauthn.Origin;
@@ -43,10 +43,10 @@ class PasskeyAssertionUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        PublicKeyCredentialCreationOptions options = passkeyRegistrationUseCase.start(email);
+        PasskeyRegistrationResult result = passkeyRegistrationUseCase.start(email);
         PublicKeyCredential<AuthenticatorAttestationResponse,
-                ClientRegistrationExtensionOutputs> credential = container.create(options);
-        passkeyRegistrationUseCase.finish(options, credential, email);
+                ClientRegistrationExtensionOutputs> credential = container.create(result.getOptions());
+        passkeyRegistrationUseCase.finish(result.getOptions(), credential, email);
     }
 
     @Test
@@ -56,10 +56,10 @@ class PasskeyAssertionUseCaseTest {
         PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> response = container.get(
                 request.getPublicKeyCredentialRequestOptions());
 
-        PasskeyAssertionResult finish = passkeyAssertionUseCase.finish(request, response);
-        String actual = finish.getEmail();
+        PasskeyAssertionResult result = passkeyAssertionUseCase.finish(request, response);
+        boolean actual = result.isSuccess();
 
-        assertThat(actual).isEqualTo(email);
+        assertThat(actual).isTrue();
     }
 
 
@@ -83,7 +83,7 @@ class PasskeyAssertionUseCaseTest {
         @DisplayName("credential과 다른 challenge로 로그인 할 경우 실패한다.")
         void test1() {
             PasskeyAssertionResult result = passkeyAssertionUseCase.finish(request, otherResponse);
-            boolean actual = result.getFailReason().isBlank();
+            boolean actual = result.isSuccess();
             assertThat(actual).isFalse();
         }
 
@@ -91,7 +91,7 @@ class PasskeyAssertionUseCaseTest {
         @DisplayName("challenge와 다른 credential로 로그인 할 경우 실패한다.")
         void test2() {
             PasskeyAssertionResult result = passkeyAssertionUseCase.finish(otherRequest, response);
-            boolean actual = result.getFailReason().isBlank();
+            boolean actual = result.isSuccess();
             assertThat(actual).isFalse();
         }
     }

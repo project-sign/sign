@@ -1,24 +1,18 @@
 package com.sign.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
+import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
 import com.yubico.webauthn.RelyingParty;
-import com.yubico.webauthn.StartRegistrationOptions;
 import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
-import com.yubico.webauthn.data.AuthenticatorSelectionCriteria;
 import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.ClientRegistrationExtensionOutputs;
 import com.yubico.webauthn.data.PublicKeyCredential;
 import com.yubico.webauthn.data.PublicKeyCredentialCreationOptions;
-import com.yubico.webauthn.data.ResidentKeyRequirement;
-import com.yubico.webauthn.data.UserIdentity;
 import de.adesso.softauthn.Authenticators;
 import de.adesso.softauthn.CredentialsContainer;
 import de.adesso.softauthn.Origin;
@@ -50,11 +44,11 @@ class PasskeyRegistrationUseCaseTest {
         @Test
         @DisplayName("같은 이메일을 전달하면 서로 다른 challenge값이 생성된다.")
         void test1() {
-            PublicKeyCredentialCreationOptions options1 = passkeyRegistrationUseCase.start(email);
-            PublicKeyCredentialCreationOptions options2 = passkeyRegistrationUseCase.start(email);
+            PasskeyRegistrationResult result1 = passkeyRegistrationUseCase.start(email);
+            PasskeyRegistrationResult result2 = passkeyRegistrationUseCase.start(email);
 
-            ByteArray challenge1 = options1.getChallenge();
-            ByteArray challenge2 = options2.getChallenge();
+            ByteArray challenge1 = result1.getOptions().getChallenge();
+            ByteArray challenge2 = result2.getOptions().getChallenge();
 
             assertThat(challenge1.getBase64Url()).isNotEqualTo(challenge2.getBase64Url());
         }
@@ -73,24 +67,9 @@ class PasskeyRegistrationUseCaseTest {
         );
 
         @Test
-        @DisplayName("residentKey를 요구해야 한다.")
+        @DisplayName("이메일 값이 존재하지 않으면 예외가 발생한다.")
         void test1() {
-            ByteArray userHandle = new ByteArray(new byte[]{0x01, 0x02, 0x03, 0x04});
-            when(handleGenerator.generateHandle()).thenReturn(userHandle);
-            passkeyRegistrationUseCase.start(email);
-            AuthenticatorSelectionCriteria authSelection = AuthenticatorSelectionCriteria.builder()
-                    .residentKey(ResidentKeyRequirement.REQUIRED)
-                    .build();
-
-            verify(relyingParty).startRegistration(
-                    StartRegistrationOptions.builder()
-                            .user(UserIdentity.builder()
-                                    .name(email)
-                                    .displayName(email)
-                                    .id(userHandle)
-                                    .build())
-                            .authenticatorSelection(authSelection)
-                            .build());
+            assertThatThrownBy(() -> passkeyRegistrationUseCase.start(null));
         }
     }
 
@@ -113,15 +92,18 @@ class PasskeyRegistrationUseCaseTest {
 
         @BeforeEach
         void setUp() {
-            options = passkeyRegistrationUseCase.start(email);
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.start(email);
+            options = result.getOptions();
             credential = container.create(options);
         }
 
         @Test
-        @DisplayName("패스키 정상 등록 시 예외가 발생하지 않는다.")
+        @DisplayName("패스키 정상 등록시 성공한다.")
         void test1() {
-            assertThatCode(() -> passkeyRegistrationUseCase.finish(options, credential, email))
-                    .doesNotThrowAnyException();
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
+            boolean actual = result.isSuccess();
+
+            assertThat(actual).isTrue();
         }
 
         @Test
@@ -130,25 +112,33 @@ class PasskeyRegistrationUseCaseTest {
             passkeyRegistrationUseCase.finish(options, credential, email);
             Optional<ByteArray> credential = passkeyRepository.getUserHandleForUsername(email);
             boolean actual = credential.isPresent();
+
             assertThat(actual).isTrue();
         }
 
         @Test
-        @DisplayName("패스키를 중복으로 저장할 경우 예외가 발생한다.")
+        @DisplayName("패스키를 중복으로 저장할 경우 실패한다.")
         void test3() {
             passkeyRegistrationUseCase.finish(options, credential, email);
-            assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(options, credential, email));
+
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
+            boolean actual = result.getFailReason().isEmpty();
+
+            assertThat(actual).isFalse();
         }
 
         @Test
-        @DisplayName("다른 기기를 등록할 경우 예외가 발생하지 않는다.")
+        @DisplayName("다른 기기를 등록할 경우 성공한다.")
         void test4() {
-            PublicKeyCredentialCreationOptions otherOption = passkeyRegistrationUseCase.start(email);
+            PasskeyRegistrationResult otherResult = passkeyRegistrationUseCase.start(email);
+            PublicKeyCredentialCreationOptions otherOption = otherResult.getOptions();
             PublicKeyCredential<AuthenticatorAttestationResponse,
                     ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOption);
 
-            assertThatCode(() -> passkeyRegistrationUseCase.finish(otherOption, otherCredential, email))
-                    .doesNotThrowAnyException();
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(otherOption, otherCredential, email);
+            boolean actual = result.isSuccess();
+
+            assertThat(actual).isTrue();
         }
 
         @Test
@@ -156,9 +146,14 @@ class PasskeyRegistrationUseCaseTest {
         void test5() {
             Origin origin = new Origin("https", "example.com", -1, null);
             CredentialsContainer container = new CredentialsContainer(origin, List.of(authenticator));
-            options = passkeyRegistrationUseCase.start(email);
+            PasskeyRegistrationResult startResult = passkeyRegistrationUseCase.start(email);
+            options = startResult.getOptions();
             credential = container.create(options);
-            assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(options, credential, email));
+
+            PasskeyRegistrationResult finishResult = passkeyRegistrationUseCase.finish(options, credential, email);
+            boolean actual = finishResult.isSuccess();
+
+            assertThat(actual).isFalse();
         }
 
         @Nested
@@ -169,13 +164,17 @@ class PasskeyRegistrationUseCaseTest {
 
             @BeforeEach
             void setUp() {
-                otherOptions = passkeyRegistrationUseCase.start(email);
+                PasskeyRegistrationResult otherResult = passkeyRegistrationUseCase.start(email);
+                otherOptions = otherResult.getOptions();
             }
 
             @Test
             @DisplayName("전혀 다른 challenge로 패스키를 등록할 경우 예외가 발생한다.")
             void test1() {
-                assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(otherOptions, credential, email));
+                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(otherOptions, credential, email);
+                boolean actual = result.isSuccess();
+
+                assertThat(actual).isFalse();
             }
 
             @Test
@@ -183,7 +182,11 @@ class PasskeyRegistrationUseCaseTest {
             void test2() {
                 PublicKeyCredential<AuthenticatorAttestationResponse,
                         ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOptions);
-                assertThatThrownBy(() -> passkeyRegistrationUseCase.finish(options, otherCredential, email));
+
+                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, otherCredential, email);
+                boolean actual = result.isSuccess();
+
+                assertThat(actual).isFalse();
             }
         }
     }

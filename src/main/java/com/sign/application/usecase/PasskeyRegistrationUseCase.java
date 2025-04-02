@@ -2,6 +2,8 @@ package com.sign.application.usecase;
 
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
+import com.sign.domain.EmailValidator;
+import com.sign.dto.PasskeyRegistrationResult;
 import com.yubico.webauthn.FinishRegistrationOptions;
 import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.RelyingParty;
@@ -26,7 +28,8 @@ public class PasskeyRegistrationUseCase {
     private final RelyingParty relyingParty;
     private final HandleGenerator handleGenerator;
 
-    public PublicKeyCredentialCreationOptions start(String email) {
+    public PasskeyRegistrationResult start(String email) {
+        EmailValidator.validateEmailAddress(email);
         ByteArray userHandle = passkeyRepository.getUserHandleForUsername(email)
                 .orElseGet(handleGenerator::generateHandle);
 
@@ -34,7 +37,7 @@ public class PasskeyRegistrationUseCase {
                 .residentKey(ResidentKeyRequirement.REQUIRED)
                 .build();
 
-        return relyingParty.startRegistration(
+        PublicKeyCredentialCreationOptions options = relyingParty.startRegistration(
                 StartRegistrationOptions.builder()
                         .user(UserIdentity.builder()
                                 .name(email)
@@ -43,11 +46,12 @@ public class PasskeyRegistrationUseCase {
                                 .build())
                         .authenticatorSelection(authSelection)
                         .build());
+        return PasskeyRegistrationResult.success(options);
     }
 
-    public void finish(PublicKeyCredentialCreationOptions options,
-                       PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> credential,
-                       String email) {
+    public PasskeyRegistrationResult finish(PublicKeyCredentialCreationOptions options,
+                                            PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> credential,
+                                            String email) {
         try {
             relyingParty.finishRegistration(FinishRegistrationOptions.builder()
                     .request(options)
@@ -56,8 +60,9 @@ public class PasskeyRegistrationUseCase {
             );
             saveCredential(options, credential, email);
         } catch (RegistrationFailedException e) {
-            throw new RuntimeException(e);
+            return PasskeyRegistrationResult.failure("패스키 등록에 실패했습니다.");
         }
+        return PasskeyRegistrationResult.success();
     }
 
     private void saveCredential(PublicKeyCredentialCreationOptions options,
