@@ -28,7 +28,7 @@ public class PasskeyRegistrationUseCase {
 
     public PublicKeyCredentialCreationOptions start(String email) {
         ByteArray userHandle = passkeyRepository.getUserHandleForUsername(email)
-                .orElseGet(() -> handleGenerator.generateHandle());
+                .orElseGet(handleGenerator::generateHandle);
 
         AuthenticatorSelectionCriteria authSelection = AuthenticatorSelectionCriteria.builder()
                 .residentKey(ResidentKeyRequirement.REQUIRED)
