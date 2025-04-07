@@ -23,3 +23,10 @@ email-certification:
   re-send-time-as-seconds: 60
   expired-time-as-seconds: 300
   max-certification-count: 3
+
+passkey:
+  relying-party:
+    id: "test.sign"
+    name: "sign"
+    origins: "test.sign"
+    handle-length: 64
