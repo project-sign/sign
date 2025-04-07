@@ -103,7 +103,7 @@ class PasskeyRegistrationUseCaseTest {
         @DisplayName("패스키 정상 등록시 성공한다.")
         void test1() {
             PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
-            boolean actual = result.isSuccess();
+            boolean actual = result.getStatus().isSuccess();
 
             assertThat(actual).isTrue();
         }
@@ -138,7 +138,7 @@ class PasskeyRegistrationUseCaseTest {
                     ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOption);
 
             PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(otherOption, otherCredential, email);
-            boolean actual = result.isSuccess();
+            boolean actual = result.getStatus().isSuccess();
 
             assertThat(actual).isTrue();
         }
@@ -153,7 +153,7 @@ class PasskeyRegistrationUseCaseTest {
             credential = container.create(options);
 
             PasskeyRegistrationResult finishResult = passkeyRegistrationUseCase.finish(options, credential, email);
-            boolean actual = finishResult.isSuccess();
+            boolean actual = finishResult.getStatus().isSuccess();
 
             assertThat(actual).isFalse();
         }
@@ -174,7 +174,7 @@ class PasskeyRegistrationUseCaseTest {
             @DisplayName("전혀 다른 challenge로 패스키를 등록할 경우 예외가 발생한다.")
             void test1() {
                 PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(otherOptions, credential, email);
-                boolean actual = result.isSuccess();
+                boolean actual = result.getStatus().isSuccess();
 
                 assertThat(actual).isFalse();
             }
@@ -186,7 +186,7 @@ class PasskeyRegistrationUseCaseTest {
                         ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOptions);
 
                 PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, otherCredential, email);
-                boolean actual = result.isSuccess();
+                boolean actual = result.getStatus().isSuccess();
 
                 assertThat(actual).isFalse();
             }

@@ -27,9 +27,4 @@ public class EmailSendResult {
     public static EmailSendResult failure(String fromAddress, String toAddress, String subject, String failReason) {
         return new EmailSendResult(Status.FAIL, fromAddress, toAddress, subject, failReason);
     }
-
-    private enum Status {
-        SUCCESS,
-        FAIL,
-    }
 }

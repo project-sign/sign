@@ -21,13 +21,4 @@ public class PasskeyAssertionResult {
     public static PasskeyAssertionResult failure(String failReason) {
         return new PasskeyAssertionResult(Status.FAIL, null, failReason);
     }
-
-    public boolean isSuccess() {
-        return status == Status.SUCCESS;
-    }
-
-    enum Status {
-        SUCCESS,
-        FAIL
-    }
 }

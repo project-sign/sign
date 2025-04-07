@@ -26,13 +26,4 @@ public class PasskeyRegistrationResult {
     public static PasskeyRegistrationResult failure(String failReason) {
         return new PasskeyRegistrationResult(Status.FAIL, null, failReason);
     }
-
-    public boolean isSuccess() {
-        return status == Status.SUCCESS;
-    }
-
-    enum Status {
-        SUCCESS,
-        FAIL
-    }
 }

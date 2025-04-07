@@ -59,7 +59,7 @@ class PasskeyAssertionUseCaseTest {
                 request.getPublicKeyCredentialRequestOptions());
 
         PasskeyAssertionResult result = passkeyAssertionUseCase.finish(request, response);
-        boolean actual = result.isSuccess();
+        boolean actual = result.getStatus().isSuccess();
 
         assertThat(actual).isTrue();
     }
@@ -85,7 +85,7 @@ class PasskeyAssertionUseCaseTest {
         @DisplayName("credential과 다른 challenge로 로그인 할 경우 실패한다.")
         void test1() {
             PasskeyAssertionResult result = passkeyAssertionUseCase.finish(request, otherResponse);
-            boolean actual = result.isSuccess();
+            boolean actual = result.getStatus().isSuccess();
             assertThat(actual).isFalse();
         }
 
@@ -93,7 +93,7 @@ class PasskeyAssertionUseCaseTest {
         @DisplayName("challenge와 다른 credential로 로그인 할 경우 실패한다.")
         void test2() {
             PasskeyAssertionResult result = passkeyAssertionUseCase.finish(otherRequest, response);
-            boolean actual = result.isSuccess();
+            boolean actual = result.getStatus().isSuccess();
             assertThat(actual).isFalse();
         }
     }
