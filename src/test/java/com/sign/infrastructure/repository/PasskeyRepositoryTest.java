@@ -48,6 +48,7 @@ abstract class PasskeyRepositoryTest {
 
         @BeforeEach
         void setUp() {
+            cleanUp();
             registeredCredential = RegisteredCredential.builder()
                     .credentialId(credential)
                     .userHandle(userHandle)
@@ -129,6 +130,4 @@ abstract class PasskeyRepositoryTest {
             assertThat(actual).isEqualTo(expected);
         }
     }
-
-
 }
