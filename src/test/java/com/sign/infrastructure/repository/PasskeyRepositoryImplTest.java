@@ -14,7 +14,7 @@ class PasskeyRepositoryImplTest extends PasskeyRepositoryTest {
 
     @Autowired
     private PasskeyRepository repository;
-    
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
