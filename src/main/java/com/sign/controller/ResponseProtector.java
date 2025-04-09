@@ -6,8 +6,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sign.controller.config.ResponseProtectorProperties;
 import com.sign.dto.AppToken;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.paseto4j.commons.PasetoException;
 import org.paseto4j.commons.SecretKey;
@@ -36,17 +39,47 @@ public class ResponseProtector {
         }
     }
 
+    public <T> Optional<T> unpack(String protectedResponse, Class<T> clazz) {
+        try {
+            String payload = Paseto.decrypt(key(), protectedResponse, properties.footer());
+            AppToken appToken = mapper.readValue(payload, AppToken.class);
+            if (Instant.now(clock).isAfter(appToken.expired())) {
+                return Optional.empty();
+            }
+            return Optional.of(deserialize(appToken.serialized(), clazz));
+        } catch (PasetoException | JsonProcessingException e) {
+            return Optional.empty();
+        }
+    }
+
+    private <T> T deserialize(String serialized, Class<T> clazz) throws JsonProcessingException {
+        return mapper.readValue(serialized, clazz);
+    }
+
     private Instant calculateExpired() {
         return Instant.now(clock).plus(properties.expired());
     }
 
     private SecretKey key() {
-        return new SecretKey(properties.secret().getBytes(StandardCharsets.UTF_8), Version.V2);
+        try {
+            validateSecretKey();
+            byte[] bytes = properties.plainPassword().getBytes(StandardCharsets.UTF_8);
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return new SecretKey(digest.digest(bytes), Version.V2);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private JsonMapper mapper() {
         JsonMapper mapper = new JsonMapper();
         mapper.registerModule(new JavaTimeModule());
         return mapper;
+    }
+
+    private void validateSecretKey() {
+        if (properties.plainPassword() == null || properties.plainPassword().length() < 32) {
+            throw new PasetoException("패스워드는 32자 이상이어야 합니다.");
+        }
     }
 }
