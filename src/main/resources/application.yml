@@ -30,3 +30,8 @@ passkey:
     name: "sign"
     origins: "test.sign"
     handle-length: 64
+
+protected-value:
+  secret: "testSecretKeytestSecretKeytestSecretKeytestSecretKeytestSecretKey"
+  footer: "sign"
+  expired-time: "30s"
