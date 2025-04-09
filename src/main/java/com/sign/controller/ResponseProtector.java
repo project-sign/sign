@@ -23,11 +23,12 @@ public class ResponseProtector {
 
     private final ResponseProtectorProperties properties;
     private final Clock clock;
+    private final JsonMapper mapper = mapper();
 
     public String encrypt(Object value) {
         try {
-            AppToken token = new AppToken(value, calculateExpired());
-            String payload = mapper().writeValueAsString(token);
+            AppToken token = new AppToken(mapper.writeValueAsString(value), calculateExpired());
+            String payload = mapper.writeValueAsString(token);
             return Paseto.encrypt(key(), payload, properties.footer());
         } catch (PasetoException | JsonProcessingException e) {
             e.printStackTrace();

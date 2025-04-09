@@ -2,5 +2,5 @@ package com.sign.dto;
 
 import java.time.Instant;
 
-public record AppToken(Object value, Instant expired) {
+public record AppToken(String serialized, Instant expired) {
 }
