@@ -15,7 +15,7 @@ public class CookieManager {
                 .build();
     }
 
-    public String findByKey(Cookie[] cookies, String name) {
+    public String findByName(Cookie[] cookies, String name) {
         return Arrays.stream(cookies)
                 .filter(it -> it.getName().equals(name))
                 .findFirst()
