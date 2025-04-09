@@ -3,7 +3,9 @@ package com.sign.controller;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CookieManager {
 
     public ResponseCookie provide(String name, String value) {
