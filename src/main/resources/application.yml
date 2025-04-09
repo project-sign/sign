@@ -34,4 +34,4 @@ passkey:
 protected-value:
   footer: "sign"
   expired-time: "30s"
-  plain-password: "testSecretKeytestSecretKeytestSecretKeytestSecretKeytestSecretKey"
+  secret-key: "testSecretKeytestSecretKeytestSecretKeytestSecretKeytestSecretKey"

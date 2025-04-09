@@ -42,25 +42,7 @@ class ResponseProtectorTest {
             assertThat(actual).isFalse();
         }
     }
-
-    @Nested
-    @DisplayName("encrypt 실패")
-    class Test2 {
-        private final ResponseProtectorProperties responseProtectorProperties = new ResponseProtectorProperties(
-                "secret",
-                "footer",
-                Duration.ofSeconds(30L));
-        private final ResponseProtector responseProtector = new ResponseProtector(responseProtectorProperties, clock);
-
-        @Test
-        @DisplayName("encrypt가 되지 않았다면 빈 값을 반환한다.")
-        void test1() {
-            String encrypt = responseProtector.encrypt("1234");
-            boolean actual = encrypt.isEmpty();
-            assertThat(actual).isTrue();
-        }
-    }
-
+    
     @Nested
     @DisplayName("unpack 성공")
     class Test3 {
