@@ -7,31 +7,42 @@ import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class InMemoryCredentialRepository implements CredentialRepository {
 
-    private final Map<ByteArray, List<RegisteredCredential>> credentials = new ConcurrentHashMap<>();
-    private final Map<String, ByteArray> userIdMapping = new ConcurrentHashMap<>();
+    private final Map<String, ByteArray> handlerMapper;
+    private final Map<ByteArray, List<RegisteredCredential>> credentialMapper;
+
+    public InMemoryCredentialRepository(Map<String, ByteArray> handlerMapper,
+                                        Map<ByteArray, List<RegisteredCredential>> credentialMapper) {
+        this.credentialMapper = credentialMapper;
+        this.handlerMapper = handlerMapper;
+    }
+
+    public InMemoryCredentialRepository() {
+        this(new HashMap<>(), new HashMap<>());
+    }
 
     public void save(String email, RegisteredCredential credential) {
-        ByteArray userId = userIdMapping.computeIfAbsent(email, (k) -> credential.getUserHandle());
-        List<RegisteredCredential> registeredCredentials = credentials.computeIfAbsent(userId, k -> new ArrayList<>());
+        ByteArray userId = handlerMapper.computeIfAbsent(email, (k) -> credential.getUserHandle());
+        List<RegisteredCredential> registeredCredentials = credentialMapper.computeIfAbsent(userId,
+                k -> new ArrayList<>());
         registeredCredentials.add(credential);
     }
 
     @Override
     public Set<PublicKeyCredentialDescriptor> getCredentialIdsForUsername(String username) {
-        ByteArray userId = userIdMapping.get(username);
+        ByteArray userId = handlerMapper.get(username);
         if (userId == null) {
             return Collections.emptySet();
         }
-        return credentials.getOrDefault(userId, Collections.emptyList()).stream()
+        return credentialMapper.getOrDefault(userId, Collections.emptyList()).stream()
                 .map(registeredCredential ->
                         PublicKeyCredentialDescriptor.builder()
                                 .id(registeredCredential.getCredentialId())
@@ -41,12 +52,12 @@ public class InMemoryCredentialRepository implements CredentialRepository {
 
     @Override
     public Optional<ByteArray> getUserHandleForUsername(String username) {
-        return Optional.ofNullable(userIdMapping.get(username));
+        return Optional.ofNullable(handlerMapper.get(username));
     }
 
     @Override
     public Optional<String> getUsernameForUserHandle(ByteArray userHandle) {
-        return userIdMapping.entrySet().stream()
+        return handlerMapper.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(userHandle))
                 .map(Map.Entry::getKey)
                 .findFirst();
@@ -54,7 +65,7 @@ public class InMemoryCredentialRepository implements CredentialRepository {
 
     @Override
     public Set<RegisteredCredential> lookupAll(ByteArray credentialId) {
-        return credentials.values().stream()
+        return credentialMapper.values().stream()
                 .flatMap(Collection::stream)
                 .filter(cred -> cred.getCredentialId().equals(credentialId))
                 .collect(Collectors.toSet());
@@ -62,7 +73,7 @@ public class InMemoryCredentialRepository implements CredentialRepository {
 
     @Override
     public Optional<RegisteredCredential> lookup(ByteArray credentialId, ByteArray userHandle) {
-        return credentials.getOrDefault(userHandle, Collections.emptyList()).stream()
+        return credentialMapper.getOrDefault(userHandle, Collections.emptyList()).stream()
                 .filter(cred -> cred.getCredentialId().equals(credentialId))
                 .findFirst();
     }

@@ -7,8 +7,11 @@ import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
+import com.sign.infrastructure.repository.InMemoryCredentialRepository;
 import com.sign.infrastructure.repository.InMemoryPasskeyRepository;
 import com.sign.support.fixture.RelyingPartyFixture;
+import com.yubico.webauthn.CredentialRepository;
+import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.RelyingParty;
 import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
 import com.yubico.webauthn.data.ByteArray;
@@ -19,7 +22,9 @@ import de.adesso.softauthn.Authenticators;
 import de.adesso.softauthn.CredentialsContainer;
 import de.adesso.softauthn.Origin;
 import de.adesso.softauthn.authenticator.WebAuthnAuthenticator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,8 +84,13 @@ class PasskeyRegistrationUseCaseTest {
     @DisplayName("Registration Finish 테스트")
     class Test2 {
         private final HandleGenerator handleGenerator = new HandleGeneratorImpl(32);
-        private final PasskeyRepository passkeyRepository = new InMemoryPasskeyRepository();
-        private final RelyingParty relyingParty = RelyingPartyFixture.create(passkeyRepository);
+        private final Map<String, ByteArray> handlerMapper = new HashMap<>();
+        private final Map<ByteArray, List<RegisteredCredential>> credentialMapper = new HashMap<>();
+        private final PasskeyRepository passkeyRepository = new InMemoryPasskeyRepository(handlerMapper,
+                credentialMapper);
+        private final CredentialRepository credentialRepository = new InMemoryCredentialRepository(handlerMapper,
+                credentialMapper);
+        private final RelyingParty relyingParty = RelyingPartyFixture.create(credentialRepository);
         private final PasskeyRegistrationUseCase passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(
                 passkeyRepository,
                 relyingParty,

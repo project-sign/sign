@@ -5,7 +5,7 @@ import com.yubico.webauthn.RegisteredCredential;
 public class InMemoryCredentialRepositoryTest extends CredentialRepositoryTest {
 
     private InMemoryCredentialRepository inMemoryCredentialRepository = new InMemoryCredentialRepository();
-    
+
     @Override
     public void cleanUp() {
         inMemoryCredentialRepository = new InMemoryCredentialRepository();
