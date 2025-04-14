@@ -2,6 +2,7 @@ package com.sign.controller;
 
 import com.sign.application.usecase.PasskeyAssertionUseCase;
 import com.sign.application.usecase.PasskeyRegistrationUseCase;
+import com.sign.controller.argumentresolver.ResponseProtector;
 import com.sign.dto.APIResponse;
 import com.sign.dto.PasskeyAssertionResult;
 import com.sign.dto.PasskeyRegistrationResult;

@@ -2,7 +2,6 @@ package com.sign.controller.argumentresolver;
 
 import com.sign.controller.CookieManager;
 import com.sign.controller.ProtectedRequest;
-import com.sign.controller.ResponseProtector;
 import com.yubico.webauthn.AssertionRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

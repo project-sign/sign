@@ -1,4 +1,4 @@
-package com.sign.controller;
+package com.sign.controller.argumentresolver;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -15,11 +15,11 @@ import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @EnableConfigurationProperties(ResponseProtectorProperties.class)
-@Service
+@Component
 public class ResponseProtector {
 
     private final ResponseProtectorProperties properties;

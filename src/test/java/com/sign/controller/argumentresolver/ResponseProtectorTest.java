@@ -1,4 +1,4 @@
-package com.sign.controller;
+package com.sign.controller.argumentresolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ class ResponseProtectorTest {
             assertThat(actual).isFalse();
         }
     }
-    
+
     @Nested
     @DisplayName("unpack 성공")
     class Test3 {

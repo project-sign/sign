@@ -1,6 +1,7 @@
 package com.sign.controller;
 
 import com.sign.application.usecase.EmailCertificationUseCase;
+import com.sign.controller.argumentresolver.ResponseProtector;
 import com.sign.dto.APIResponse;
 import com.sign.dto.EmailCertificationRequest;
 import com.sign.dto.EmailSendResult;
