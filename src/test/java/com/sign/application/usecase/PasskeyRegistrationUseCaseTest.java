@@ -36,11 +36,12 @@ class PasskeyRegistrationUseCaseTest {
 
     private final String email = "passkey@sign.co.kr";
     private final PasskeyRepository passkeyRepository = Mockito.mock(PasskeyRepository.class);
+    private final CredentialRepository credentialRepository = Mockito.mock(CredentialRepository.class);
 
     @Nested
     @DisplayName("Registration Value 테스트")
     class Test1 {
-        private final RelyingParty relyingParty = RelyingPartyFixture.create(passkeyRepository);
+        private final RelyingParty relyingParty = RelyingPartyFixture.create(credentialRepository);
         private final HandleGenerator handleGenerator = new HandleGeneratorImpl(32);
         private final PasskeyRegistrationUseCase passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(
                 passkeyRepository,
@@ -122,7 +123,7 @@ class PasskeyRegistrationUseCaseTest {
         @DisplayName("해당 이메일의 패스키가 저장된다.")
         void test2() {
             passkeyRegistrationUseCase.finish(options, credential, email);
-            Optional<ByteArray> credential = passkeyRepository.getUserHandleForUsername(email);
+            Optional<ByteArray> credential = passkeyRepository.findUserHandleByEmail(email);
             boolean actual = credential.isPresent();
 
             assertThat(actual).isTrue();

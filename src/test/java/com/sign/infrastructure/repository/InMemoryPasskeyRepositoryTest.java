@@ -1,13 +1,27 @@
 package com.sign.infrastructure.repository;
 
+import com.yubico.webauthn.RegisteredCredential;
+import com.yubico.webauthn.data.ByteArray;
+import org.junit.jupiter.api.BeforeEach;
+
 public class InMemoryPasskeyRepositoryTest extends PasskeyRepositoryTest {
 
-    public InMemoryPasskeyRepositoryTest() {
-        passkeyRepository = new InMemoryPasskeyRepository();
+    private InMemoryPasskeyRepository inMemoryPasskeyRepository;
+
+    @BeforeEach
+    void setUp() {
+        inMemoryPasskeyRepository = new InMemoryPasskeyRepository();
+        passkeyRepository = inMemoryPasskeyRepository;
     }
 
     @Override
     public void cleanUp() {
-        passkeyRepository = new InMemoryPasskeyRepository();
+        inMemoryPasskeyRepository = new InMemoryPasskeyRepository();
+        passkeyRepository = inMemoryPasskeyRepository;
+    }
+
+    @Override
+    public RegisteredCredential findRegisteredCredential(ByteArray credential, ByteArray userHandle) {
+        return inMemoryPasskeyRepository.findByCredentialIdAndUserHandle(credential, userHandle);
     }
 }

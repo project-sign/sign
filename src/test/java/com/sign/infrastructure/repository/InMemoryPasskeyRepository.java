@@ -3,16 +3,11 @@ package com.sign.infrastructure.repository;
 import com.sign.application.repository.PasskeyRepository;
 import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.data.ByteArray;
-import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class InMemoryPasskeyRepository implements PasskeyRepository {
 
@@ -30,47 +25,9 @@ public class InMemoryPasskeyRepository implements PasskeyRepository {
     }
 
     @Override
-    public Set<PublicKeyCredentialDescriptor> getCredentialIdsForUsername(String username) {
-        ByteArray userId = handlerMapper.get(username);
-        if (userId == null) {
-            return Collections.emptySet();
-        }
-        return credentialMapper.getOrDefault(userId, Collections.emptyList()).stream()
-                .map(registeredCredential ->
-                        PublicKeyCredentialDescriptor.builder()
-                                .id(registeredCredential.getCredentialId())
-                                .build())
-                .collect(Collectors.toSet());
+    public Optional<ByteArray> findUserHandleByEmail(String email) {
+        return Optional.ofNullable(handlerMapper.get(email));
     }
-
-    @Override
-    public Optional<ByteArray> getUserHandleForUsername(String username) {
-        return Optional.ofNullable(handlerMapper.get(username));
-    }
-
-    @Override
-    public Optional<String> getUsernameForUserHandle(ByteArray userHandle) {
-        return handlerMapper.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(userHandle))
-                .map(Map.Entry::getKey)
-                .findFirst();
-    }
-
-    @Override
-    public Set<RegisteredCredential> lookupAll(ByteArray credentialId) {
-        return credentialMapper.values().stream()
-                .flatMap(Collection::stream)
-                .filter(cred -> cred.getCredentialId().equals(credentialId))
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Optional<RegisteredCredential> lookup(ByteArray credentialId, ByteArray userHandle) {
-        return credentialMapper.getOrDefault(userHandle, Collections.emptyList()).stream()
-                .filter(cred -> cred.getCredentialId().equals(credentialId))
-                .findFirst();
-    }
-
 
     @Override
     public void save(String email, RegisteredCredential credential) {
@@ -107,5 +64,12 @@ public class InMemoryPasskeyRepository implements PasskeyRepository {
                     .build();
         }
         return credential;
+    }
+
+    RegisteredCredential findByCredentialIdAndUserHandle(ByteArray credential, ByteArray userHandle) {
+        return credentialMapper.get(userHandle).stream()
+                .filter(it -> it.getCredentialId().equals(credential))
+                .findFirst()
+                .get();
     }
 }
