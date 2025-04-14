@@ -49,7 +49,7 @@ public class CookieManager {
         return Arrays.stream(cookies)
                 .filter(it -> it.getName().equals(name))
                 .findFirst()
-                .map(Cookie::getName)
+                .map(Cookie::getValue)
                 .orElse("");
     }
 }
