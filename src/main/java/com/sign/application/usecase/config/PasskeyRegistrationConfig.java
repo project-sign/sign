@@ -1,8 +1,8 @@
 package com.sign.application.usecase.config;
 
 import com.sign.application.repository.HandleGenerator;
-import com.sign.application.repository.PasskeyRepository;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
+import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RelyingParty;
 import com.yubico.webauthn.data.RelyingPartyIdentity;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class PasskeyRegistrationConfig {
 
     private final PasskeyRegistrationProperties passkeyRegistrationProperties;
-    private final PasskeyRepository passkeyRepository;
+    private final CredentialRepository credentialRepository;
 
     @Bean
     public RelyingParty relyingParty() {
@@ -27,7 +27,7 @@ public class PasskeyRegistrationConfig {
 
         return RelyingParty.builder()
                 .identity(rpIdentity)
-                .credentialRepository(passkeyRepository)
+                .credentialRepository(credentialRepository)
                 .origins(passkeyRegistrationProperties.origins())
                 .build();
     }
