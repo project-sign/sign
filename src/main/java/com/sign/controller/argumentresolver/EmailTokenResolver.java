@@ -29,7 +29,9 @@ public class EmailTokenResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        // email_token=의 쿠키 값을 추출합니다.
         String protectedEmailToken = cookieManager.findByName(request.getCookies(), EMAIL_TOKEN_NAME);
+        // jwt를 두번째 파라미터의 class 인스턴스로 변환합니다. 즉 String객체를 반환하게 됩니다.
         return responseProtector.unpack(protectedEmailToken, String.class)
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 추출할 수 없습니다."));
     }

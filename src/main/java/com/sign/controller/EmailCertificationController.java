@@ -38,7 +38,9 @@ public class EmailCertificationController {
                                                       HttpServletResponse response) {
         boolean isSuccess = emailCertificationUseCase.validateCertification(param);
         if (isSuccess) {
+            //email을 sub로 jwt를 만듭니다. encrypted에는 jwt 포맷에 맞는 문자열이 저장됩니다.
             String encrypted = responseProtector.encrypt(param.email());
+            //jwt를 cookie로 전달합니다. cookie의 이름은 email_token입니다. 최종 형태는 email_token=[jwt문자열];로 저장됩니다.
             ResponseCookie emailToken = cookieManager.provide("email_token", encrypted);
             response.setHeader(HttpHeaders.SET_COOKIE, emailToken.toString());
         }
