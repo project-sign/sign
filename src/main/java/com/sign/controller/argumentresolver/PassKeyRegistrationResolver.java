@@ -1,6 +1,6 @@
 package com.sign.controller.argumentresolver;
 
-import com.sign.controller.CookieManager;
+import com.sign.controller.support.CookieManager;
 import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import com.yubico.webauthn.data.PublicKeyCredentialCreationOptions;

@@ -1,9 +1,9 @@
 package com.sign.controller.config;
 
-import com.sign.controller.CookieManager;
 import com.sign.controller.argumentresolver.EmailTokenResolver;
 import com.sign.controller.argumentresolver.PassKeyRegistrationResolver;
 import com.sign.controller.argumentresolver.PasskeyAssertionResolver;
+import com.sign.controller.support.CookieManager;
 import com.sign.controller.support.JWTWrapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

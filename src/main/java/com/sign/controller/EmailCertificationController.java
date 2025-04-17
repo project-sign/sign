@@ -1,6 +1,7 @@
 package com.sign.controller;
 
 import com.sign.application.usecase.EmailCertificationUseCase;
+import com.sign.controller.support.CookieManager;
 import com.sign.controller.support.JWTWrapper;
 import com.sign.dto.APIResponse;
 import com.sign.dto.EmailCertificationRequest;

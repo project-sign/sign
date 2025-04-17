@@ -2,6 +2,7 @@ package com.sign.controller;
 
 import com.sign.application.usecase.PasskeyAssertionUseCase;
 import com.sign.application.usecase.PasskeyRegistrationUseCase;
+import com.sign.controller.support.CookieManager;
 import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import com.sign.dto.APIResponse;

@@ -1,4 +1,4 @@
-package com.sign.controller;
+package com.sign.controller.support;
 
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
