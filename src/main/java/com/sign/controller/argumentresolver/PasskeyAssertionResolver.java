@@ -1,7 +1,7 @@
 package com.sign.controller.argumentresolver;
 
 import com.sign.controller.CookieManager;
-import com.sign.controller.ProtectedRequest;
+import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import com.yubico.webauthn.AssertionRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ public class PasskeyAssertionResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(ProtectedRequest.class)
+        return parameter.hasParameterAnnotation(JWTWrapped.class)
                 && AssertionRequest.class.isAssignableFrom(parameter.getParameterType());
     }
 

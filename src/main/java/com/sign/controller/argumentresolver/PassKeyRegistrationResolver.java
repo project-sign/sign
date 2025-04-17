@@ -1,7 +1,7 @@
 package com.sign.controller.argumentresolver;
 
 import com.sign.controller.CookieManager;
-import com.sign.controller.ProtectedRequest;
+import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import com.yubico.webauthn.data.PublicKeyCredentialCreationOptions;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class PassKeyRegistrationResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(ProtectedRequest.class)
+        return parameter.hasParameterAnnotation(JWTWrapped.class)
                 && PublicKeyCredentialCreationOptions.class.isAssignableFrom(parameter.getParameterType());
     }
 

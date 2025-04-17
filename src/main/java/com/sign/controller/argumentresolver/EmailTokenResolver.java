@@ -1,7 +1,7 @@
 package com.sign.controller.argumentresolver;
 
 import com.sign.controller.CookieManager;
-import com.sign.controller.ProtectedRequest;
+import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class EmailTokenResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(ProtectedRequest.class)
+        return parameter.hasParameterAnnotation(JWTWrapped.class)
                 && String.class.isAssignableFrom(parameter.getParameterType());
 
     }

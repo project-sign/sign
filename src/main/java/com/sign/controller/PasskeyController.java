@@ -2,6 +2,7 @@ package com.sign.controller;
 
 import com.sign.application.usecase.PasskeyAssertionUseCase;
 import com.sign.application.usecase.PasskeyRegistrationUseCase;
+import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import com.sign.dto.APIResponse;
 import com.sign.dto.PasskeyAssertionResult;
@@ -34,7 +35,7 @@ public class PasskeyController {
     private final CookieManager cookieManager;
 
     @GetMapping("/registration")
-    public APIResponse<PasskeyRegistrationResult> startRegistration(@ProtectedRequest String email,
+    public APIResponse<PasskeyRegistrationResult> startRegistration(@JWTWrapped String email,
                                                                     HttpServletResponse response) {
         PasskeyRegistrationResult result = passkeyRegistrationUseCase.start(email);
         if (result.getStatus().isSuccess()) {
@@ -49,8 +50,8 @@ public class PasskeyController {
     }
 
     @PostMapping("/registration")
-    public APIResponse<PasskeyRegistrationResult> finishRegistration(@ProtectedRequest String email,
-                                                                     @ProtectedRequest PublicKeyCredentialCreationOptions options,
+    public APIResponse<PasskeyRegistrationResult> finishRegistration(@JWTWrapped String email,
+                                                                     @JWTWrapped PublicKeyCredentialCreationOptions options,
                                                                      @RequestBody PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> credential) {
         PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
         return new APIResponse<>(
@@ -72,7 +73,7 @@ public class PasskeyController {
     }
 
     @PostMapping("/assertion")
-    public APIResponse<PasskeyAssertionResult> finishAssertion(@ProtectedRequest AssertionRequest options,
+    public APIResponse<PasskeyAssertionResult> finishAssertion(@JWTWrapped AssertionRequest options,
                                                                @RequestBody PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> credential) {
         PasskeyAssertionResult result = passkeyAssertionUseCase.finish(options, credential);
         return new APIResponse<>(
