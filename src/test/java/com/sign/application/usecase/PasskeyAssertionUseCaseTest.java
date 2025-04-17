@@ -8,11 +8,15 @@ import com.sign.dto.PasskeyAssertionResult;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
 import com.sign.infrastructure.repository.InMemoryPasskeyRepository;
+import com.sign.infrastructure.yubico.repository.InMemoryCredentialRepository;
 import com.sign.support.fixture.RelyingPartyFixture;
 import com.yubico.webauthn.AssertionRequest;
+import com.yubico.webauthn.CredentialRepository;
+import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.RelyingParty;
 import com.yubico.webauthn.data.AuthenticatorAssertionResponse;
 import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
+import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.ClientAssertionExtensionOutputs;
 import com.yubico.webauthn.data.ClientRegistrationExtensionOutputs;
 import com.yubico.webauthn.data.PublicKeyCredential;
@@ -20,7 +24,9 @@ import de.adesso.softauthn.Authenticators;
 import de.adesso.softauthn.CredentialsContainer;
 import de.adesso.softauthn.Origin;
 import de.adesso.softauthn.authenticator.WebAuthnAuthenticator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,11 +34,16 @@ import org.junit.jupiter.api.Test;
 
 class PasskeyAssertionUseCaseTest {
 
-    private final String email = "passkey@sign.co.kr";
-    private final PasskeyRepository passkeyRepository = new InMemoryPasskeyRepository();
-    private final RelyingParty relyingParty = RelyingPartyFixture.create(passkeyRepository);
+    private final Map<String, ByteArray> handlerMapper = new HashMap<>();
+    private final Map<ByteArray, List<RegisteredCredential>> credentialMapper = new HashMap<>();
+    private final PasskeyRepository passkeyRepository = new InMemoryPasskeyRepository(handlerMapper, credentialMapper);
+    private final CredentialRepository credentialRepository = new InMemoryCredentialRepository(handlerMapper,
+            credentialMapper);
+    private final RelyingParty relyingParty = RelyingPartyFixture.create(credentialRepository);
     private final PasskeyAssertionUseCase passkeyAssertionUseCase = new PasskeyAssertionUseCase(relyingParty,
             passkeyRepository);
+
+    private final String email = "passkey@sign.co.kr";
     private final WebAuthnAuthenticator authenticator = Authenticators.yubikey5Nfc().build();
     private final PasskeyRegistrationUseCase passkeyRegistrationUseCase;
     private final HandleGenerator handleGenerator = new HandleGeneratorImpl(32);

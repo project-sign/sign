@@ -30,7 +30,7 @@ public class PasskeyRegistrationUseCase {
 
     public PasskeyRegistrationResult start(String email) {
         EmailValidator.validateEmailAddress(email);
-        ByteArray userHandle = passkeyRepository.getUserHandleForUsername(email)
+        ByteArray userHandle = passkeyRepository.findUserHandleByEmail(email)
                 .orElseGet(handleGenerator::generateHandle);
 
         AuthenticatorSelectionCriteria authSelection = AuthenticatorSelectionCriteria.builder()
