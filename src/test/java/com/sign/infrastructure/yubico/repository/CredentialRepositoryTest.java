@@ -1,8 +1,9 @@
-package com.sign.infrastructure.repository;
+package com.sign.infrastructure.yubico.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.sign.application.repository.HandleGenerator;
+import com.sign.infrastructure.repository.HandleGeneratorImpl;
 import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.data.ByteArray;

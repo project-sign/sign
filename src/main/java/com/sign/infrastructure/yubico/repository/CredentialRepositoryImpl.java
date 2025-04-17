@@ -1,4 +1,4 @@
-package com.sign.infrastructure.repository;
+package com.sign.infrastructure.yubico.repository;
 
 import com.sign.infrastructure.jpa.PasskeyEntity;
 import com.sign.infrastructure.jpa.repository.PasskeyJpaRepository;

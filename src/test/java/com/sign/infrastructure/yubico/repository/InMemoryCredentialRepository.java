@@ -1,4 +1,4 @@
-package com.sign.infrastructure.repository;
+package com.sign.infrastructure.yubico.repository;
 
 import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RegisteredCredential;
