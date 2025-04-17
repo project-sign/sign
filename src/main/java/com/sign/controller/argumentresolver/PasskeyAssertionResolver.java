@@ -2,6 +2,7 @@ package com.sign.controller.argumentresolver;
 
 import com.sign.controller.CookieManager;
 import com.sign.controller.ProtectedRequest;
+import com.sign.controller.support.JWTWrapper;
 import com.yubico.webauthn.AssertionRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class PasskeyAssertionResolver implements HandlerMethodArgumentResolver {
     private static final String ASSERTION_CHALLENGE_NAME = "assertion_challenge";
 
-    private final ResponseProtector responseProtector;
+    private final JWTWrapper JWTWrapper;
     private final CookieManager cookieManager;
 
     @Override
@@ -29,7 +30,7 @@ public class PasskeyAssertionResolver implements HandlerMethodArgumentResolver {
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String protectedOptions = cookieManager.findByName(request.getCookies(), ASSERTION_CHALLENGE_NAME);
-        return responseProtector.unpack(protectedOptions, AssertionRequest.class)
+        return JWTWrapper.unwrap(protectedOptions, AssertionRequest.class)
                 .orElseThrow(() -> new IllegalArgumentException("Assertion Challenge를 추출할 수 없습니다."));
     }
 }

@@ -4,7 +4,7 @@ import com.sign.controller.CookieManager;
 import com.sign.controller.argumentresolver.EmailTokenResolver;
 import com.sign.controller.argumentresolver.PassKeyRegistrationResolver;
 import com.sign.controller.argumentresolver.PasskeyAssertionResolver;
-import com.sign.controller.argumentresolver.ResponseProtector;
+import com.sign.controller.support.JWTWrapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final ResponseProtector protector;
+    private final JWTWrapper protector;
     private final CookieManager cookieManager;
 
     @Override

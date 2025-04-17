@@ -2,7 +2,7 @@ package com.sign.controller;
 
 import com.sign.application.usecase.PasskeyAssertionUseCase;
 import com.sign.application.usecase.PasskeyRegistrationUseCase;
-import com.sign.controller.argumentresolver.ResponseProtector;
+import com.sign.controller.support.JWTWrapper;
 import com.sign.dto.APIResponse;
 import com.sign.dto.PasskeyAssertionResult;
 import com.sign.dto.PasskeyRegistrationResult;
@@ -30,7 +30,7 @@ public class PasskeyController {
 
     private final PasskeyRegistrationUseCase passkeyRegistrationUseCase;
     private final PasskeyAssertionUseCase passkeyAssertionUseCase;
-    private final ResponseProtector responseProtector;
+    private final JWTWrapper JWTWrapper;
     private final CookieManager cookieManager;
 
     @GetMapping("/registration")
@@ -38,7 +38,7 @@ public class PasskeyController {
                                                                     HttpServletResponse response) {
         PasskeyRegistrationResult result = passkeyRegistrationUseCase.start(email);
         if (result.getStatus().isSuccess()) {
-            String encrypt = responseProtector.encrypt(result.getOptions());
+            String encrypt = JWTWrapper.wrap(result.getOptions());
             ResponseCookie registrationChallenge = cookieManager.provide("registration_challenge", encrypt);
             response.setHeader(HttpHeaders.SET_COOKIE, registrationChallenge.toString());
         }
@@ -62,7 +62,7 @@ public class PasskeyController {
     @GetMapping("/assertion")
     public APIResponse<AssertionRequest> startAssertion(HttpServletResponse response) {
         AssertionRequest result = passkeyAssertionUseCase.start();
-        String encrypt = responseProtector.encrypt(result);
+        String encrypt = JWTWrapper.wrap(result);
         ResponseCookie registrationChallenge = cookieManager.provide("assertion_challenge", encrypt);
         response.setHeader(HttpHeaders.SET_COOKIE, registrationChallenge.toString());
         return new APIResponse<>(

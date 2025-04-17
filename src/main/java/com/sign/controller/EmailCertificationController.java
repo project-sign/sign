@@ -1,7 +1,7 @@
 package com.sign.controller;
 
 import com.sign.application.usecase.EmailCertificationUseCase;
-import com.sign.controller.argumentresolver.ResponseProtector;
+import com.sign.controller.support.JWTWrapper;
 import com.sign.dto.APIResponse;
 import com.sign.dto.EmailCertificationRequest;
 import com.sign.dto.EmailSendResult;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmailCertificationController {
 
     private final EmailCertificationUseCase emailCertificationUseCase;
-    private final ResponseProtector responseProtector;
+    private final JWTWrapper JWTWrapper;
     private final CookieManager cookieManager;
 
     @PostMapping
@@ -38,7 +38,7 @@ public class EmailCertificationController {
                                                       HttpServletResponse response) {
         boolean isSuccess = emailCertificationUseCase.validateCertification(param);
         if (isSuccess) {
-            String encrypted = responseProtector.encrypt(param.email());
+            String encrypted = JWTWrapper.wrap(param.email());
             ResponseCookie emailToken = cookieManager.provide("email_token", encrypted);
             response.setHeader(HttpHeaders.SET_COOKIE, emailToken.toString());
         }

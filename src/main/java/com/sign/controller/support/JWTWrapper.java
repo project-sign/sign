@@ -1,4 +1,4 @@
-package com.sign.controller.argumentresolver;
+package com.sign.controller.support;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -18,7 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 
 /**
- * 객체를 JWT 형식으로 암호화하고, 이를 다시 복호화하여 역직렬화할 수 있는 기능을 제공하는 컴포넌트입니다.
+ * 객체를 JWT 형식으로 래핑하고, 이를 다시 역직렬화할 수 있는 기능을 제공하는 컴포넌트입니다.
  *
  * <p>
  * JWT의 subject(sub) 필드에 직렬화된 객체를 저장하며, 만료 시간은 구성 파일에서 설정된 {@link ResponseProtectorProperties}를 기준으로 계산됩니다.
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @EnableConfigurationProperties(ResponseProtectorProperties.class)
 @Component
-public class ResponseProtector {
+public class JWTWrapper {
 
     private final ResponseProtectorProperties properties;
     private final Clock clock;
@@ -44,7 +44,7 @@ public class ResponseProtector {
      * @param value 직렬화할 객체
      * @return JWT 문자열. 직렬화 중 예외 발생 시 빈 문자열을 반환합니다.
      */
-    public String encrypt(Object value) {
+    public String wrap(Object value) {
         try {
             AppToken token = new AppToken(mapper.writeValueAsString(value), calculateExpired());
             String payload = mapper.writeValueAsString(token);
@@ -70,7 +70,7 @@ public class ResponseProtector {
      * @param <T>               반환 타입
      * @return 역직렬화된 객체를 포함한 {@code Optional}, 실패 시 {@code Optional.empty()}
      */
-    public <T> Optional<T> unpack(String protectedResponse, Class<T> clazz) {
+    public <T> Optional<T> unwrap(String protectedResponse, Class<T> clazz) {
         try {
             JWTVerifier verifier = JWT.require(key()).build();
             DecodedJWT payload = verifier.verify(protectedResponse);

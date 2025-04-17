@@ -2,6 +2,7 @@ package com.sign.controller.argumentresolver;
 
 import com.sign.controller.CookieManager;
 import com.sign.controller.ProtectedRequest;
+import com.sign.controller.support.JWTWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -15,7 +16,7 @@ public class EmailTokenResolver implements HandlerMethodArgumentResolver {
 
     private static final String EMAIL_TOKEN_NAME = "email_token";
 
-    private final ResponseProtector responseProtector;
+    private final JWTWrapper JWTWrapper;
     private final CookieManager cookieManager;
 
     @Override
@@ -32,7 +33,7 @@ public class EmailTokenResolver implements HandlerMethodArgumentResolver {
         // email_token=의 쿠키 값을 추출합니다.
         String protectedEmailToken = cookieManager.findByName(request.getCookies(), EMAIL_TOKEN_NAME);
         // jwt를 두번째 파라미터의 class 인스턴스로 변환합니다. 즉 String객체를 반환하게 됩니다.
-        return responseProtector.unpack(protectedEmailToken, String.class)
+        return JWTWrapper.unwrap(protectedEmailToken, String.class)
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 추출할 수 없습니다."));
     }
 }
