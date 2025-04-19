@@ -38,10 +38,12 @@ public class EmailCertificationUseCase {
 
         LocalDateTime now = LocalDateTime.now(clock);
 
+        String subject = "Sign 인증 번호";
+
         if (checkEmailReSendTime(param, now)) {
             return EmailSendResult.failure(
                     emailCertificationProperties.mailHost(),
-                    param.email(), "Sign 인증 번호",
+                    param.email(), subject,
                     "아직 인증 메일을 보낼 수 없습니다."
             );
         }
@@ -54,7 +56,9 @@ public class EmailCertificationUseCase {
         );
         emailCertificationLogger.logCertification(certificationCode);
 
-        return emailSender.send(emailCertificationProperties.mailHost(), param.email(), "Sign 인증 번호", code);
+        emailSender.send(emailCertificationProperties.mailHost(), param.email(), subject, code);
+
+        return EmailSendResult.success(emailCertificationProperties.mailHost(), param.email(), subject);
     }
 
     private boolean checkEmailReSendTime(EmailCertificationRequest param, LocalDateTime now) {
