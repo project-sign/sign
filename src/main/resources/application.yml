@@ -32,4 +32,3 @@ protected-value:
   footer: "sign"
   expired: "30s"
   secret-key: "testSecretKeytestSecretKeytestSecretKeytestSecretKeytestSecretKey"
-  
