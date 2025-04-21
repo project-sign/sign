@@ -9,8 +9,7 @@ import org.springframework.stereotype.Component;
  * 쿠키를 생성하고 조회하는 기능을 제공하는 컴포넌트 클래스입니다.
  *
  * <p>
- * 이 클래스는 JWT나 기타 토큰 정보를 {@code HttpOnly} 속성을 가진 쿠키로 생성하거나,
- * 클라이언트로부터 전달받은 쿠키 배열에서 특정 이름의 쿠키 값을 조회하는 유틸리티 메서드를 제공합니다.
+ * 이 클래스는 JWT나 기타 토큰 정보를 {@code HttpOnly} 속성을 가진 쿠키로 생성하거나, 클라이언트로부터 전달받은 쿠키 배열에서 특정 이름의 쿠키 값을 조회하는 유틸리티 메서드를 제공합니다.
  * </p>
  */
 @Component
@@ -46,6 +45,9 @@ public class CookieManager {
      * @return 쿠키 값 또는 빈 문자열
      */
     public String findByName(Cookie[] cookies, String name) {
+        if (cookies == null) {
+            return "";
+        }
         return Arrays.stream(cookies)
                 .filter(it -> it.getName().equals(name))
                 .findFirst()
