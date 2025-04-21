@@ -30,5 +30,6 @@ passkey:
 
 protected-value:
   footer: "sign"
-  expired-time: "30s"
+  expired: "30s"
   secret-key: "testSecretKeytestSecretKeytestSecretKeytestSecretKeytestSecretKey"
+  
