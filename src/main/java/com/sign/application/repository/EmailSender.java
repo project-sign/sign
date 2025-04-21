@@ -1,7 +1,5 @@
 package com.sign.application.repository;
 
-import com.sign.dto.EmailSendResult;
-
 public interface EmailSender {
-    EmailSendResult send(String from, String to, String subject, String body);
+    void send(String from, String to, String subject, String body);
 }
