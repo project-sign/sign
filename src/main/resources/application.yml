@@ -1,3 +1,11 @@
+server:
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-type: PKCS12
+    key-store-password: changeit
+    key-alias: local-ssl
+
 spring:
   config:
     import: classpath:secret/mail.yml
@@ -23,9 +31,9 @@ spring:
 
 passkey:
   relying-party:
-    id: "test.sign"
+    id: "localhost"
     name: "sign"
-    origins: "test.sign"
+    origins: "localhost"
     handle-length: 64
 
 protected-value:
