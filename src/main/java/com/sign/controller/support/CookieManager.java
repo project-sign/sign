@@ -30,6 +30,7 @@ public class CookieManager {
         return ResponseCookie.from(name)
                 .value(value)
                 .httpOnly(true)
+                .path("/")
                 .build();
     }
 
