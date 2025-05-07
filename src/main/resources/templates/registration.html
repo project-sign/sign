@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="css/registration.css">
+    </head>
+    <body>
+        <div class="container">
+            <div id="title" class="title">
+                <img src="logo.png" alt="Register Icon" />
+                <span>회원 가입</span>
+            </div>
+            <div class="slider-wrapper">
+                <div class="step-container">
+                  <div class="step" id="email-send">
+                    <div class="email-form">
+                        <div class="validate-input">
+                            <input id="email" class="email-input email-send" name="email" type="text" placeholder="이메일을 입력해주세요." autocomplete="off">
+                            <span class="error-message"></span>
+                        </div>
+                        <div id="emailVerify" class="hidden">
+                            <div class="validate-input">
+                                <div class="email-input input-timer-wrapper">
+                                    <input id="auth_code" class="email-verify" name="auth_code" type="text" placeholder="인증번호를 입력해주세요." autocomplete="off">
+                                    <span class="timer">03:00</span>
+                                </div>
+                                <span class="error-message"></span>
+                                <div class="resend-message">이메일을 받지 못하셨나요? <button class="resend-button">재전송</button></div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="step" id="registerPasskey">
+                    <div class="step-item-center">
+                        <button type="submit" class="passkey-register">패스키 등록</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <!--<button class="hidden" id="back-button">&lt; 이전으로</button> -->
+                <button type="button" class="email-send active" disabled>이메일 확인</button>
+                <button type="button" class="email-verify hidden" disabled>인증번호 확인</button>
+            </div>
+        </div>
+    </body>
+    <script src="js/registration.js"></script>
+</html>

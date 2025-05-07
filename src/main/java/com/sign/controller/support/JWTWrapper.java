@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sign.controller.config.ResponseProtectorProperties;
 import com.sign.dto.AppToken;
@@ -21,8 +22,8 @@ import org.springframework.stereotype.Component;
  * 객체를 JWT 형식으로 래핑하고, 이를 다시 역직렬화할 수 있는 기능을 제공하는 컴포넌트입니다.
  *
  * <p>
- * JWT의 subject(sub) 필드에 직렬화된 객체를 저장하며, 만료 시간은 구성 파일에서 설정된 {@link ResponseProtectorProperties}를 기준으로 계산됩니다.
- * 복호화 시에는 서명 검증과 만료 시간을 체크하여 유효한 경우에만 값을 반환합니다.
+ * JWT의 subject(sub) 필드에 직렬화된 객체를 저장하며, 만료 시간은 구성 파일에서 설정된 {@link ResponseProtectorProperties}를 기준으로 계산됩니다. 복호화 시에는 서명
+ * 검증과 만료 시간을 체크하여 유효한 경우에만 값을 반환합니다.
  * </p>
  */
 @RequiredArgsConstructor
@@ -61,8 +62,8 @@ public class JWTWrapper {
      * JWT 문자열을 주어진 클래스 타입으로 역직렬화합니다.
      *
      * <p>
-     * JWT의 유효성 검사(서명 및 만료 시간)를 수행하고, 조건을 만족하면 {@code Optional}로 역직렬화된 객체를 반환합니다.
-     * 유효하지 않거나 예외가 발생한 경우 {@code Optional.empty()}를 반환합니다.
+     * JWT의 유효성 검사(서명 및 만료 시간)를 수행하고, 조건을 만족하면 {@code Optional}로 역직렬화된 객체를 반환합니다. 유효하지 않거나 예외가 발생한 경우
+     * {@code Optional.empty()}를 반환합니다.
      * </p>
      *
      * @param protectedResponse JWT 문자열
@@ -122,6 +123,7 @@ public class JWTWrapper {
      */
     private JsonMapper mapper() {
         JsonMapper mapper = new JsonMapper();
+        mapper.registerModule(new Jdk8Module());
         mapper.registerModule(new JavaTimeModule());
         return mapper;
     }
