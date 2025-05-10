@@ -40,6 +40,15 @@ public class EmailCertificationUseCase {
 
         String subject = "Sign 인증 번호";
 
+        int certificationTryCount = emailCertificationTryLogger.findCertificationTryCount(param.email());
+        if (certificationTryCount > emailCertificationProperties.maxCertificationCount()) {
+            return EmailSendResult.failure(
+                    emailCertificationProperties.mailHost(),
+                    param.email(), subject,
+                    "인증 시도 횟수를 초과하여 더 이상 인증 메일을 보낼 수 없습니다."
+            );
+        }
+
         if (checkEmailReSendTime(param, now)) {
             return EmailSendResult.failure(
                     emailCertificationProperties.mailHost(),
