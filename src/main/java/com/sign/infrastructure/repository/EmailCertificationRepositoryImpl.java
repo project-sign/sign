@@ -38,4 +38,10 @@ public class EmailCertificationRepositoryImpl implements EmailCertificationRepos
                 .map(it -> new EmailCertificationCode(it.getEmail(), it.getCertificationCode(), it.getExpiredAt()))
                 .findFirst();
     }
+
+    @Override
+    @Transactional
+    public void deleteByEmail(String emailAddress) {
+        jpaRepository.findByEmail(emailAddress).ifPresent(jpaRepository::delete);
+    }
 }

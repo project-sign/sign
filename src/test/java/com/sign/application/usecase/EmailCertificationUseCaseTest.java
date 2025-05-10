@@ -2,8 +2,7 @@ package com.sign.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -263,8 +262,30 @@ class EmailCertificationUseCaseTest {
         }
 
         @Test
-        @DisplayName("인증 횟수가 남아있고, 인증에 실패하면 인증 횟수가 증가한다.")
+        @DisplayName("이메일 재전송 시 기존 인증 코드가 삭제되고 새로운 인증 코드가 저장된다.")
         void test6() {
+            String email = "test@test.com";
+            String oldCode = "123456";
+            String newCode = "654321";
+            LocalDateTime now = LocalDateTime.now(CLOCK);
+            
+            when(codeGenerator.generate(6)).thenReturn(newCode);
+            when(emailCertificationLogger.lastCreatedAtFor(email))
+                    .thenReturn(Optional.of(now.minusMinutes(10)));
+            
+            emailCertificationUseCase.sendCertification(new EmailCertificationRequest(email));
+            
+            verify(emailCertificationRepository).deleteByEmail(email);
+            verify(emailCertificationRepository).save(argThat(code -> 
+                code.email().equals(email) && 
+                code.certificationCode().equals(newCode) &&
+                code.expiredAt().isAfter(now)
+            ));
+        }
+
+        @Test
+        @DisplayName("인증 횟수가 남아있고, 인증에 실패하면 인증 횟수가 증가한다.")
+        void test7() {
             int beforeTryCount = emailCertificationProperties.maxCertificationCount() - 1;
             when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
                     beforeTryCount
@@ -281,7 +302,7 @@ class EmailCertificationUseCaseTest {
 
         @Test
         @DisplayName("인증에 성공하면 인증 횟수가 0이 된다.")
-        void test7() {
+        void test8() {
             int beforeTryCount = emailCertificationProperties.maxCertificationCount() - 1;
             when(emailCertificationTryLogger.findCertificationTryCount("test@test.com")).thenReturn(
                     beforeTryCount

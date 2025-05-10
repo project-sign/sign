@@ -50,6 +50,7 @@ public class EmailCertificationUseCase {
 
         String code = codeGenerator.generate(6);
 
+        emailCertificationRepository.deleteByEmail(param.email());
         EmailCertificationCode certificationCode = emailCertificationRepository.save(
                 new EmailCertificationCode(param.email(), code,
                         now.plusSeconds(emailCertificationProperties.expiredTimeAsSeconds()))
