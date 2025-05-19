@@ -7,4 +7,6 @@ public interface EmailCertificationRepository {
     EmailCertificationCode save(EmailCertificationCode emailCertificationCode);
 
     Optional<EmailCertificationCode> findByEmail(String emailAddress);
+    
+    void deleteByEmail(String emailAddress);
 }
