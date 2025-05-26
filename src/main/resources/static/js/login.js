@@ -13,8 +13,8 @@ console.log(appId);
             return response.json();
         })
         .then(data => {
-            console.log(data.data);
-            // data.data 로 "2. passkey 추출" 구현
+            const challenge = data.data.publicKeyCredentialRequestOptions.challenge;
+            loginPasskey(challenge);
         })
         .catch(err => {
             console.error("API 실패:", err);
@@ -22,6 +22,38 @@ console.log(appId);
 })();
 
 // 2. passkey 추출
+
+function toBase64Url(base64) {
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlToBase64(base64Url) {
+    // URL-safe 형식을 표준 base64로 변환
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+    // 패딩 추가 (길이가 4의 배수가 아닐 경우 '=' 추가)
+    while (base64.length % 4) {
+        base64 += '=';
+    }
+    return base64;
+}
+
+async function loginPasskey(challenge) {
+    try {
+        const publicKey = {
+            challenge: Uint8Array.from(atob(base64UrlToBase64(challenge)), c => c.charCodeAt(0)),
+            userVerification: "preferred",
+        };
+        // 브라우저 passkey 인증 기능 호출
+        const credential = await navigator.credentials.get({
+              publicKey: publicKey
+        });
+
+        console.log(credential);
+    } catch (error) {
+        console.error("패스키 로그인이 실패했습니다.", error);
+    }
+}
 // 3. assertion finish request(post /assertion)
 // 4. TODO: post /assertion이 access_token을 반환하도록 변경
 
