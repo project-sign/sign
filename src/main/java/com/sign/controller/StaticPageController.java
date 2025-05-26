@@ -10,4 +10,9 @@ public class StaticPageController {
     String register() {
         return "registration";
     }
+
+    @GetMapping("login")
+    String login() {
+        return "login";
+    }
 }
