@@ -33,7 +33,7 @@ passkey:
   relying-party:
     id: "localhost"
     name: "sign"
-    origins: "localhost"
+    origins: "https://localhost:8080"
     handle-length: 64
 
 protected-value:
