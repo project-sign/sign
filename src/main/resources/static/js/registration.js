@@ -1,3 +1,5 @@
+const params = new URLSearchParams(window.location.search);
+const appId = params.get('appId');
 const EMAIL_TIME_OUT = 180;
 let currentIndex = 0;
 let timerId;
@@ -240,6 +242,7 @@ async function registerPasskey(options) {
         });
         if (registerResponse.ok) {
             alert("회원가입이 성공적으로 완료 되었습니다.");
+            window.location.href =`/login?appId=${appId}`
         } else {
             alert("패스키 등록에 실패했습니다.", error);
         }
