@@ -7,6 +7,7 @@ import com.sign.controller.support.JWTWrapped;
 import com.sign.controller.support.JWTWrapper;
 import com.sign.dto.APIResponse;
 import com.sign.dto.PasskeyAssertionResult;
+import com.sign.dto.PasskeyRegistrationRequest;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.yubico.webauthn.AssertionRequest;
 import com.yubico.webauthn.data.AuthenticatorAssertionResponse;
@@ -53,8 +54,8 @@ public class PasskeyController {
     @PostMapping("/registration")
     public APIResponse<PasskeyRegistrationResult> finishRegistration(@JWTWrapped String email,
                                                                      @JWTWrapped PublicKeyCredentialCreationOptions options,
-                                                                     @RequestBody PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> credential) {
-        PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
+                                                                     @RequestBody PasskeyRegistrationRequest registrationRequest) {
+        PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, registrationRequest, email);
         return new APIResponse<>(
                 "패스키 등록 요청 결과",
                 result

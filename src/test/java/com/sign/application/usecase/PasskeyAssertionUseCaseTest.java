@@ -59,7 +59,7 @@ class PasskeyAssertionUseCaseTest {
         PasskeyRegistrationResult result = passkeyRegistrationUseCase.start(email);
         PublicKeyCredential<AuthenticatorAttestationResponse,
                 ClientRegistrationExtensionOutputs> credential = container.create(result.getOptions());
-        passkeyRegistrationUseCase.finish(result.getOptions(), credential, email);
+        passkeyRegistrationUseCase.finishInternal(result.getOptions(), credential, email);
     }
 
     @Test

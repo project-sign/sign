@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
+import com.sign.dto.PasskeyRegistrationRequest;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
 import com.sign.infrastructure.repository.InMemoryPasskeyRepository;
@@ -110,10 +111,50 @@ class PasskeyRegistrationUseCaseTest {
             credential = container.create(options);
         }
 
+        @Nested
+        @DisplayName("개인정보 동의 여부 확인 테스트")
+        class Test00 {
+            @Test
+            @DisplayName("개인정보 동의를 하면 패스키를 등록한다.")
+            void test000() {
+                PasskeyRegistrationUseCase spy = Mockito.spy(passkeyRegistrationUseCase);
+                spy.finish(options, new PasskeyRegistrationRequest(true, credential), email);
+
+                Mockito.verify(spy, Mockito.times(1)).finishInternal(options, credential, email);
+            }
+            @Test
+            @DisplayName("개인정보 동의를 거부하면 패스키를 등록 안한다.")
+            void test001() {
+                PasskeyRegistrationUseCase spy = Mockito.spy(passkeyRegistrationUseCase);
+                spy.finish(options, new PasskeyRegistrationRequest(false, credential), email);
+
+                Mockito.verify(spy, Mockito.never()).finishInternal(options, credential, email);
+            }
+        }
+
+        @Test
+        @DisplayName("개인정보 동의가 되어있으면 패스키 등록이 성공한다.")
+        void test000() {
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, new PasskeyRegistrationRequest(true, credential), email);
+            boolean actual = result.getStatus().isSuccess();
+
+            assertThat(actual).isTrue();
+        }
+
+
+        @Test
+        @DisplayName("개인정보 동의가 되어있지 않으면 패스키 등록이 실패한다.")
+        void test0() {
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, new PasskeyRegistrationRequest(false, credential), email);
+            boolean actual = result.getStatus().isSuccess();
+
+            assertThat(actual).isFalse();
+        }
+
         @Test
         @DisplayName("패스키 정상 등록시 성공한다.")
         void test1() {
-            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finishInternal(options, credential, email);
             boolean actual = result.getStatus().isSuccess();
 
             assertThat(actual).isTrue();
@@ -122,7 +163,7 @@ class PasskeyRegistrationUseCaseTest {
         @Test
         @DisplayName("해당 이메일의 패스키가 저장된다.")
         void test2() {
-            passkeyRegistrationUseCase.finish(options, credential, email);
+            passkeyRegistrationUseCase.finishInternal(options, credential, email);
             Optional<ByteArray> credential = passkeyRepository.findUserHandleByEmail(email);
             boolean actual = credential.isPresent();
 
@@ -132,9 +173,9 @@ class PasskeyRegistrationUseCaseTest {
         @Test
         @DisplayName("패스키를 중복으로 저장할 경우 실패한다.")
         void test3() {
-            passkeyRegistrationUseCase.finish(options, credential, email);
+            passkeyRegistrationUseCase.finishInternal(options, credential, email);
 
-            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, credential, email);
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finishInternal(options, credential, email);
             boolean actual = result.getFailReason().isEmpty();
 
             assertThat(actual).isFalse();
@@ -148,7 +189,7 @@ class PasskeyRegistrationUseCaseTest {
             PublicKeyCredential<AuthenticatorAttestationResponse,
                     ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOption);
 
-            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(otherOption, otherCredential, email);
+            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finishInternal(otherOption, otherCredential, email);
             boolean actual = result.getStatus().isSuccess();
 
             assertThat(actual).isTrue();
@@ -163,7 +204,7 @@ class PasskeyRegistrationUseCaseTest {
             options = startResult.getOptions();
             credential = container.create(options);
 
-            PasskeyRegistrationResult finishResult = passkeyRegistrationUseCase.finish(options, credential, email);
+            PasskeyRegistrationResult finishResult = passkeyRegistrationUseCase.finishInternal(options, credential, email);
             boolean actual = finishResult.getStatus().isSuccess();
 
             assertThat(actual).isFalse();
@@ -184,7 +225,7 @@ class PasskeyRegistrationUseCaseTest {
             @Test
             @DisplayName("전혀 다른 challenge로 패스키를 등록할 경우 예외가 발생한다.")
             void test1() {
-                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(otherOptions, credential, email);
+                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finishInternal(otherOptions, credential, email);
                 boolean actual = result.getStatus().isSuccess();
 
                 assertThat(actual).isFalse();
@@ -196,7 +237,7 @@ class PasskeyRegistrationUseCaseTest {
                 PublicKeyCredential<AuthenticatorAttestationResponse,
                         ClientRegistrationExtensionOutputs> otherCredential = container.create(otherOptions);
 
-                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, otherCredential, email);
+                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finishInternal(options, otherCredential, email);
                 boolean actual = result.getStatus().isSuccess();
 
                 assertThat(actual).isFalse();

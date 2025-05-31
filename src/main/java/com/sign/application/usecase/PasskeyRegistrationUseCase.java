@@ -3,6 +3,7 @@ package com.sign.application.usecase;
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
 import com.sign.domain.EmailValidator;
+import com.sign.dto.PasskeyRegistrationRequest;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.yubico.webauthn.FinishRegistrationOptions;
 import com.yubico.webauthn.RegisteredCredential;
@@ -50,6 +51,16 @@ public class PasskeyRegistrationUseCase {
     }
 
     public PasskeyRegistrationResult finish(PublicKeyCredentialCreationOptions options,
+                                            PasskeyRegistrationRequest registrationRequest,
+                                            String email) {
+        if (registrationRequest == null || !registrationRequest.agree()) {
+            return PasskeyRegistrationResult.failure("개인정보 수집 거부로 패스키 등록에 실패했습니다.");
+        }
+        PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> credential = registrationRequest.credential();
+        return finishInternal(options, credential, email);
+    }
+
+    PasskeyRegistrationResult finishInternal(PublicKeyCredentialCreationOptions options,
                                             PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> credential,
                                             String email) {
         try {
