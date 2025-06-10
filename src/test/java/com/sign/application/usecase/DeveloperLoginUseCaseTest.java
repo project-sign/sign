@@ -103,7 +103,7 @@ class DeveloperLoginUseCaseTest {
 
 
             @Test
-            @DisplayName("로그인 한 개발자 이메일을 반환한다.")
+            @DisplayName("로그인한 개발자 이메일을 반환한다.")
             void test1() {
                 String expected = "test@sign.com";
 

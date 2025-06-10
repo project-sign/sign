@@ -43,7 +43,7 @@ class DeveloperRegistrationUseCaseTest {
     class Test1 {
 
         @Nested
-        @DisplayName("패스키  실패한다면")
+        @DisplayName("패스키 인증에 실패한다면")
         class WhenPasskeyAssertionFailed {
 
             @BeforeEach
