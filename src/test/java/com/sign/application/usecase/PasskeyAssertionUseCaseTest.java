@@ -1,9 +1,8 @@
 package com.sign.application.usecase;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
+import com.sign.application.repository.PersonalInfoAgreeRepository;
 import com.sign.dto.PasskeyAssertionResult;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
@@ -14,23 +13,21 @@ import com.yubico.webauthn.AssertionRequest;
 import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.RelyingParty;
-import com.yubico.webauthn.data.AuthenticatorAssertionResponse;
-import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
-import com.yubico.webauthn.data.ByteArray;
-import com.yubico.webauthn.data.ClientAssertionExtensionOutputs;
-import com.yubico.webauthn.data.ClientRegistrationExtensionOutputs;
-import com.yubico.webauthn.data.PublicKeyCredential;
+import com.yubico.webauthn.data.*;
 import de.adesso.softauthn.Authenticators;
 import de.adesso.softauthn.CredentialsContainer;
 import de.adesso.softauthn.Origin;
 import de.adesso.softauthn.authenticator.WebAuthnAuthenticator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class PasskeyAssertionUseCaseTest {
 
@@ -43,6 +40,13 @@ class PasskeyAssertionUseCaseTest {
     private final PasskeyAssertionUseCase passkeyAssertionUseCase = new PasskeyAssertionUseCase(relyingParty,
             passkeyRepository);
 
+    private final PersonalInfoAgreeRepository personalInfoAgreeRepository = new PersonalInfoAgreeRepository() {
+        @Override
+        public void save(String email, boolean agree) {
+
+        }
+    };
+
     private final String email = "passkey@sign.co.kr";
     private final WebAuthnAuthenticator authenticator = Authenticators.yubikey5Nfc().build();
     private final PasskeyRegistrationUseCase passkeyRegistrationUseCase;
@@ -51,7 +55,7 @@ class PasskeyAssertionUseCaseTest {
     private final CredentialsContainer container = new CredentialsContainer(origin, List.of(authenticator));
 
     PasskeyAssertionUseCaseTest() {
-        passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(passkeyRepository, relyingParty, handleGenerator);
+        passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(passkeyRepository, relyingParty, handleGenerator, personalInfoAgreeRepository);
     }
 
     @BeforeEach

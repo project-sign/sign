@@ -2,6 +2,7 @@ package com.sign.application.usecase;
 
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
+import com.sign.application.repository.PersonalInfoAgreeRepository;
 import com.sign.dto.PasskeyRegistrationRequest;
 import com.sign.dto.PasskeyRegistrationResult;
 import com.sign.infrastructure.repository.HandleGeneratorImpl;
@@ -35,6 +36,7 @@ class PasskeyRegistrationUseCaseTest {
     private final String email = "passkey@sign.co.kr";
     private final PasskeyRepository passkeyRepository = Mockito.mock(PasskeyRepository.class);
     private final CredentialRepository credentialRepository = Mockito.mock(CredentialRepository.class);
+    private final PersonalInfoAgreeRepository personalInfoAgreeRepository = Mockito.mock(PersonalInfoAgreeRepository.class);
 
     @Nested
     @DisplayName("Registration Value 테스트")
@@ -44,7 +46,8 @@ class PasskeyRegistrationUseCaseTest {
         private final PasskeyRegistrationUseCase passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(
                 passkeyRepository,
                 relyingParty,
-                handleGenerator
+                handleGenerator,
+                personalInfoAgreeRepository
         );
 
         @Test
@@ -69,7 +72,8 @@ class PasskeyRegistrationUseCaseTest {
         private final PasskeyRegistrationUseCase passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(
                 passkeyRepository,
                 relyingParty,
-                handleGenerator
+                handleGenerator,
+                personalInfoAgreeRepository
         );
 
         @Test
@@ -93,7 +97,8 @@ class PasskeyRegistrationUseCaseTest {
         private final PasskeyRegistrationUseCase passkeyRegistrationUseCase = new PasskeyRegistrationUseCase(
                 passkeyRepository,
                 relyingParty,
-                handleGenerator
+                handleGenerator,
+                personalInfoAgreeRepository
         );
         private final WebAuthnAuthenticator authenticator = Authenticators.yubikey5Nfc().build();
         private final Origin origin = new Origin("https", "sign.co.kr", -1, null);
