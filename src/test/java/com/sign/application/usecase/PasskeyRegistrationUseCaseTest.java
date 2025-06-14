@@ -1,8 +1,5 @@
 package com.sign.application.usecase;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import com.sign.application.repository.HandleGenerator;
 import com.sign.application.repository.PasskeyRepository;
 import com.sign.dto.PasskeyRegistrationRequest;
@@ -14,24 +11,24 @@ import com.sign.support.fixture.RelyingPartyFixture;
 import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RegisteredCredential;
 import com.yubico.webauthn.RelyingParty;
-import com.yubico.webauthn.data.AuthenticatorAttestationResponse;
-import com.yubico.webauthn.data.ByteArray;
-import com.yubico.webauthn.data.ClientRegistrationExtensionOutputs;
-import com.yubico.webauthn.data.PublicKeyCredential;
-import com.yubico.webauthn.data.PublicKeyCredentialCreationOptions;
+import com.yubico.webauthn.data.*;
 import de.adesso.softauthn.Authenticators;
 import de.adesso.softauthn.CredentialsContainer;
 import de.adesso.softauthn.Origin;
 import de.adesso.softauthn.authenticator.WebAuthnAuthenticator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PasskeyRegistrationUseCaseTest {
 
@@ -111,46 +108,6 @@ class PasskeyRegistrationUseCaseTest {
             credential = container.create(options);
         }
 
-        @Nested
-        @DisplayName("개인정보 동의 여부 확인 테스트")
-        class Test00 {
-            @Test
-            @DisplayName("개인정보 동의를 하면 패스키를 등록한다.")
-            void test000() {
-                PasskeyRegistrationUseCase spy = Mockito.spy(passkeyRegistrationUseCase);
-                spy.finish(options, new PasskeyRegistrationRequest(true, credential), email);
-
-                Mockito.verify(spy, Mockito.times(1)).finishInternal(options, credential, email);
-            }
-            @Test
-            @DisplayName("개인정보 동의를 거부하면 패스키를 등록 안한다.")
-            void test001() {
-                PasskeyRegistrationUseCase spy = Mockito.spy(passkeyRegistrationUseCase);
-                spy.finish(options, new PasskeyRegistrationRequest(false, credential), email);
-
-                Mockito.verify(spy, Mockito.never()).finishInternal(options, credential, email);
-            }
-        }
-
-        @Test
-        @DisplayName("개인정보 동의가 되어있으면 패스키 등록이 성공한다.")
-        void test000() {
-            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, new PasskeyRegistrationRequest(true, credential), email);
-            boolean actual = result.getStatus().isSuccess();
-
-            assertThat(actual).isTrue();
-        }
-
-
-        @Test
-        @DisplayName("개인정보 동의가 되어있지 않으면 패스키 등록이 실패한다.")
-        void test0() {
-            PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, new PasskeyRegistrationRequest(false, credential), email);
-            boolean actual = result.getStatus().isSuccess();
-
-            assertThat(actual).isFalse();
-        }
-
         @Test
         @DisplayName("패스키 정상 등록시 성공한다.")
         void test1() {
@@ -208,6 +165,29 @@ class PasskeyRegistrationUseCaseTest {
             boolean actual = finishResult.getStatus().isSuccess();
 
             assertThat(actual).isFalse();
+        }
+
+        @Nested
+        @DisplayName("개인정보 동의 여부 확인 테스트")
+        class Test00 {
+
+            @Test
+            @DisplayName("개인정보 동의가 되어있으면 패스키 등록이 성공한다.")
+            void test2() {
+                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, new PasskeyRegistrationRequest(true, credential), email);
+                boolean actual = result.getStatus().isSuccess();
+
+                assertThat(actual).isTrue();
+            }
+
+            @Test
+            @DisplayName("개인정보 동의가 되어있지 않으면 패스키 등록이 실패한다.")
+            void test3() {
+                PasskeyRegistrationResult result = passkeyRegistrationUseCase.finish(options, new PasskeyRegistrationRequest(false, credential), email);
+                boolean actual = result.getStatus().isSuccess();
+
+                assertThat(actual).isFalse();
+            }
         }
 
         @Nested
