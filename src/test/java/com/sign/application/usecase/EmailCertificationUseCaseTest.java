@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 import com.sign.application.repository.EmailCertificationLogger;
 import com.sign.application.repository.EmailCertificationRepository;
@@ -12,10 +13,8 @@ import com.sign.application.repository.EmailCertificationTryLogger;
 import com.sign.application.repository.EmailSender;
 import com.sign.application.repository.RandomCodeGenerator;
 import com.sign.application.usecase.config.EmailCertificationProperties;
-import com.sign.dto.EmailCertificationCode;
-import com.sign.dto.EmailCertificationRequest;
-import com.sign.dto.EmailSendResult;
-import com.sign.dto.EmailValidationRequest;
+import com.sign.dto.*;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -183,6 +182,57 @@ class EmailCertificationUseCaseTest {
                             any()
                     );
                 }
+            }
+        }
+
+        @Nested
+        @DisplayName("인증 시도 횟수가 초과되었다면")
+        class WhenCertificationTryCountExceeded {
+            @Test
+            @DisplayName("인증 메일을 보낼 수 없다")
+            void shouldNotSendEmail() {
+                // given
+                String email = "test@example.com";
+                EmailCertificationRequest request = new EmailCertificationRequest(email);
+                int maxTryCount = emailCertificationProperties.maxCertificationCount();
+                
+                when(emailCertificationTryLogger.findCertificationTryCount(email))
+                        .thenReturn(maxTryCount + 1);
+
+                // when
+                EmailSendResult result = emailCertificationUseCase.sendCertification(request);
+
+                // then
+                assertThat(result.getStatus()).isEqualTo(Status.FAIL);
+                assertThat(result.getFailReason()).isEqualTo("인증 시도 횟수를 초과하여 더 이상 인증 메일을 보낼 수 없습니다.");
+                verify(emailSender, never()).send(any(), any(), any(), any());
+            }
+        }
+
+        @Nested
+        @DisplayName("인증 시도 횟수가 최대 허용 횟수와 같다면")
+        class WhenCertificationTryCountEqualsMax {
+            @Test
+            @DisplayName("인증 메일을 보낼 수 있다")
+            void shouldSendEmail() {
+                // given
+                String email = "test@example.com";
+                EmailCertificationRequest request = new EmailCertificationRequest(email);
+                int maxTryCount = emailCertificationProperties.maxCertificationCount();
+                
+                when(emailCertificationTryLogger.findCertificationTryCount(email))
+                        .thenReturn(maxTryCount);
+                when(emailCertificationLogger.lastCreatedAtFor(email))
+                        .thenReturn(Optional.empty());
+                when(codeGenerator.generate(anyInt()))
+                        .thenReturn("123456");
+
+                // when
+                EmailSendResult result = emailCertificationUseCase.sendCertification(request);
+
+                // then
+                assertThat(result.getStatus()).isEqualTo(Status.SUCCESS);
+                verify(emailSender).send(any(), eq(email), any(), any());
             }
         }
     }
